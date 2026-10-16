@@ -45,6 +45,7 @@ export default function Sidebar({ onClose }) {
   const [mediaOpen, setMediaOpen] = useState(false);
   const [isDisconnected, setIsDisconnected] = useState(false);
   const [updateInfo, setUpdateInfo] = useState(null);
+  const [commitStatus, setCommitStatus] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [shutdownCountdown, setShutdownCountdown] = useState(0);
@@ -59,12 +60,19 @@ export default function Sidebar({ onClose }) {
     });
   }, []);
 
-  // Lazy check for new npm version in background after initial render
+  // Lazy check for a new npm version + whether the build commit is the latest
+  // one on the repo, in background after initial render.
   useEffect(() => {
     const timer = setTimeout(() => {
       fetch("/api/version")
         .then(res => res.json())
-        .then(data => { if (data.hasUpdate) setUpdateInfo(data); })
+        .then(data => {
+          if (data.hasUpdate) setUpdateInfo(data);
+          setCommitStatus({
+            commitIsLatest: data.commitIsLatest ?? null,
+            commitLatest: data.commitLatest ?? null,
+          });
+        })
         .catch(() => {});
     }, 2500);
     return () => clearTimeout(timer);
@@ -130,12 +138,27 @@ export default function Sidebar({ onClose }) {
                 {APP_CONFIG.name}
               </h1>
               <span
-                className="text-xs text-text-muted"
+                className="flex items-center gap-1.5 text-xs text-text-muted"
                 title={APP_CONFIG.commit ? `commit ${APP_CONFIG.commit}` : undefined}
               >
-                v{APP_CONFIG.version}
-                {APP_CONFIG.commit && (
-                  <span className="font-mono"> · {APP_CONFIG.commit.slice(0, 7)}</span>
+                <span>
+                  v{APP_CONFIG.version}
+                  {APP_CONFIG.commit && (
+                    <span className="font-mono"> · {APP_CONFIG.commit.slice(0, 7)}</span>
+                  )}
+                </span>
+                {APP_CONFIG.commit && commitStatus?.commitIsLatest === true && (
+                  <span className="rounded bg-green-500/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-green-600 dark:text-green-400">
+                    Latest
+                  </span>
+                )}
+                {APP_CONFIG.commit && commitStatus?.commitIsLatest === false && (
+                  <span
+                    className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-amber-600 dark:text-amber-400"
+                    title={`Newer commit available: ${commitStatus.commitLatest} — restart to update`}
+                  >
+                    Update
+                  </span>
                 )}
               </span>
             </div>

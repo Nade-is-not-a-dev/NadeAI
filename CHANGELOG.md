@@ -5,6 +5,7 @@
 - **System Prompt**: click-to-add scope pickers — "Add provider" lists the providers that can route right now (active connections, no-auth free providers, compatible nodes with models); "Add model" reuses the Combo & Vision Adapter picker (combos hidden — a combo expands before routing, so its name could never match; node display prefixes are stored as the node id)
 - **Dashboard**: "Usage Examples" playground between API Endpoint and API Keys on the Endpoint page — copy/download-ready cURL / Node.js / Python / PHP / Go snippets with the endpoint and an active API key filled in, model picker + editable message, and OS tabs (Windows vs Linux/macOS) that adjust each command
 - **Dashboard**: optional CDN serving for provider icons — build with NEXT_PUBLIC_ICON_BASE (e.g. a jsDelivr mirror of this repo) to load icons from the CDN edge, with per-image fallback to the server's own copy
+- **Dashboard**: the sidebar version line now shows a green "Latest" badge when the running build is the newest commit of the sync repo (checked server-side via the GitHub API against the origin remote baked at build, cached 10 min; an amber "Update" badge with the newer short SHA shows when the server runs an older commit)
 - **Dashboard**: show the build commit next to the version (sidebar `v0.5.x · <sha>`, full SHA in the tooltip; also on the profile footer and in `/api/version` as `commit`) — baked from the git checkout at build time
 
 ## Fixes

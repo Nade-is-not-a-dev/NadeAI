@@ -1,5 +1,8 @@
 import https from "https";
 import pkg from "../../../../package.json" with { type: "json" };
+import { getCommitStatus } from "@/lib/latestCommit";
+
+export const dynamic = "force-dynamic";
 
 const NPM_PACKAGE_NAME = "9router";
 const VERSION_CACHE_TTL_MS = 3600000; // cache npm latest lookup for 1h
@@ -53,11 +56,25 @@ async function getLatestVersionCached() {
 }
 
 export async function GET() {
-  const latestVersion = await getLatestVersionCached();
+  // Same source order as APP_CONFIG.commit so the compared commit is the one
+  // the UI displays (start.sh env first, then next.config's git value).
+  const commit = process.env.NEXT_PUBLIC_BUILD_SHA || process.env.BUILD_GIT_SHA || "";
+  const repoSlug = process.env.BUILD_REPO_SLUG || "";
+
+  const [latestVersion, commitStatus] = await Promise.all([
+    getLatestVersionCached(),
+    getCommitStatus({ commit, repoSlug }),
+  ]);
+
   const currentVersion = pkg.version;
   const hasUpdate = latestVersion ? compareVersions(latestVersion, currentVersion) > 0 : false;
-  // Commit the running build was made from (baked at build time; "" without git).
-  const commit = process.env.BUILD_GIT_SHA || "";
 
-  return Response.json({ currentVersion, latestVersion, hasUpdate, commit });
+  return Response.json({
+    currentVersion,
+    latestVersion,
+    hasUpdate,
+    commit,
+    commitLatest: commitStatus.commitLatest,
+    commitIsLatest: commitStatus.commitIsLatest,
+  });
 }

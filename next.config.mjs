@@ -16,6 +16,21 @@ const buildGitSha = (() => {
     return "";
   }
 })();
+
+// "owner/repo" of the origin remote (the fork the server syncs from), used by
+// /api/version to check whether the running commit is the latest one on the
+// repo. Empty when there is no GitHub origin — the check is then skipped.
+const buildRepoSlug = (() => {
+  try {
+    const remote = execSync("git remote get-url origin", { cwd: projectRoot, stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+    const match = remote.match(/github\.com[:/]([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/i);
+    return match ? `${match[1]}/${match[2]}` : "";
+  } catch {
+    return "";
+  }
+})();
 // CLI bundling needs workspace root so tracing includes hoisted node_modules (slim ~50MB).
 // Docker / default uses projectRoot so server.js lands at /app/server.js (not nested).
 const tracingRoot = process.env.NEXT_TRACING_ROOT_MODE === "workspace"
@@ -49,7 +64,8 @@ const nextConfig = {
     unoptimized: true
   },
   env: {
-    BUILD_GIT_SHA: buildGitSha
+    BUILD_GIT_SHA: buildGitSha,
+    BUILD_REPO_SLUG: buildRepoSlug
   },
   experimental: {
     // #1529/#1572: LLM clients can send long context or base64 image payloads through /v1 rewrites.
