@@ -51,6 +51,7 @@ describe("buildUsageExample", () => {
     expect(buildUsageExample({ ...base, language: "python" }).filename).toBe("chat.py");
     expect(buildUsageExample({ ...base, language: "php" }).filename).toBe("chat.php");
     expect(buildUsageExample({ ...base, language: "go" }).filename).toBe("main.go");
+    expect(buildUsageExample({ ...base, language: "curl", os: "windows" }).filename).toBe("chat.cmd");
   });
 
   it("falls back to the POSIX curl example for unknown languages", () => {
@@ -59,15 +60,76 @@ describe("buildUsageExample", () => {
     expect(code.startsWith("curl ")).toBe(true);
   });
 
-  it("uses OS-appropriate curl (bash vs PowerShell)", () => {
+  it("uses OS-appropriate curl (bash vs cmd.exe)", () => {
     const unix = buildUsageExample({ ...base, language: "curl", os: "unix" });
     const win = buildUsageExample({ ...base, language: "curl", os: "windows" });
     expect(unix.filename).toBe("chat.sh");
-    expect(win.filename).toBe("chat.ps1");
+    expect(win.filename).toBe("chat.cmd");
     expect(unix.code).toContain(" \\\n"); // backslash line continuations
-    expect(win.code).toContain("`\n"); // PowerShell backtick continuations
+    expect(win.code).toContain(" ^\n"); // cmd.exe caret continuations
     expect(win.code).toContain("curl.exe");
-    expect(win.code).toContain("PowerShell");
+    expect(win.code).toContain("REM Windows Command Prompt");
+  });
+
+  it("cmd.exe receives the exact JSON body after caret-join + CRT parsing", () => {
+    // Minimal Windows argv parser: double quotes toggle, backslashes follow
+    // the 2n / 2n+1 rules. Used to prove the generated line hands curl.exe
+    // byte-identical JSON (single-quoted JSON was the bug this guards).
+    const parse = (line) => {
+      const args = [];
+      let cur = "";
+      let inQuotes = false;
+      let started = false;
+      let i = 0;
+      while (i < line.length) {
+        const ch = line[i];
+        if (ch === "\\") {
+          let backslashes = 0;
+          while (line[i] === "\\") { backslashes++; i++; }
+          if (line[i] === '"') {
+            cur += "\\".repeat(Math.floor(backslashes / 2));
+            if (backslashes % 2 === 1) { cur += '"'; i++; }
+          } else {
+            cur += "\\".repeat(backslashes);
+          }
+          started = true;
+          continue;
+        }
+        if (ch === '"') { inQuotes = !inQuotes; started = true; i++; continue; }
+        if ((ch === " " || ch === "\t") && !inQuotes) {
+          if (started) { args.push(cur); cur = ""; started = false; }
+          i++;
+          continue;
+        }
+        cur += ch;
+        started = true;
+        i++;
+      }
+      if (started) args.push(cur);
+      return args;
+    };
+
+    // parser sanity
+    expect(parse('a "b c" d')).toEqual(["a", "b c", "d"]);
+    expect(parse('"{\\"x\\":1}"')).toEqual(['{"x":1}']);
+
+    const messages = [
+      "Hello!",
+      "It's a \"quoted\" test",
+      "line1\nline2",
+      "ends with backslash \\",
+      "100% done",
+    ];
+    for (const message of messages) {
+      const { code } = buildUsageExample({ ...base, message, language: "curl", os: "windows" });
+      // cmd joins caret-continued lines, then the CRT parses argv
+      const joined = code.trimEnd().split("\n").filter((l) => !l.startsWith("REM")).join(" ").replace(/\^/g, " ");
+      const args = parse(joined);
+      const dIndex = args.indexOf("-d");
+      expect(dIndex, message).toBeGreaterThan(-1);
+      const expected = JSON.stringify({ model: base.model, messages: [{ role: "user", content: message }] });
+      expect(args[dIndex + 1], message).toBe(expected);
+    }
   });
 
   it("adjusts the Python install/run hints per OS", () => {
@@ -79,14 +141,14 @@ describe("buildUsageExample", () => {
     expect(win).toContain("py chat.py");
   });
 
-  it("escapes single quotes for each shell's quoting style", () => {
+  it("escapes single quotes for the bash payload, leaves cmd untouched", () => {
     const message = "It's a test";
     const unix = buildUsageExample({ ...base, message, language: "curl", os: "unix" }).code;
-    const win = buildUsageExample({ ...base, message, language: "curl", os: "windows" }).code;
     // bash single-quoted payload: ' closes, \' escapes, ' reopens
     expect(unix).toContain("It'\\''s a test");
-    // PowerShell single-quoted payload: quote doubles
-    expect(win).toContain("It''s a test");
+    // cmd treats single quotes literally — no escaping needed
+    const win = buildUsageExample({ ...base, message, language: "curl", os: "windows" }).code;
+    expect(win).toContain("It's a test");
   });
 
   it("keeps the JSON body single-line even for multi-line messages", () => {

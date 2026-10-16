@@ -5,9 +5,9 @@
 // and message come from the form (a placeholder is used when a field is
 // empty so the snippet stays syntactically valid).
 //
-// OS adjustments: cURL is genuinely different on Windows (PowerShell
-// continuations, curl.exe, single-quote escaping), Python differs in the
-// install/run hint lines; the remaining languages are OS-invariant.
+// OS adjustments: cURL is genuinely different on Windows (cmd.exe
+// continuations and \" escaping, curl.exe, .cmd download); Python differs in
+// the install/run hint lines; the remaining languages are OS-invariant.
 
 export const USAGE_LANGUAGES = [
   { id: "curl", label: "cURL" },
@@ -31,8 +31,29 @@ const trimTrailing = (baseUrl) => String(baseUrl || "http://localhost:3499/v1").
 
 // POSIX shell single-quoted literal: close quote, escaped quote, reopen.
 const shSingle = (s) => "'" + String(s).replace(/'/g, "'\\''") + "'";
-// PowerShell single-quoted literal: double the quote.
-const psSingle = (s) => "'" + String(s).replace(/'/g, "''") + "'";
+// Windows command-line literal (MSVC/CRT rules): wrap in quotes and double
+// every backslash run that sits before an embedded quote or the closing quote
+// (2n/comma rules), so the target receives the exact bytes. Backslashes not
+// touching a quote stay single.
+const winQuote = (s) => {
+  const text = String(s);
+  let out = "\"";
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === "\\") {
+      let run = 0;
+      while (text[i + run] === "\\") run++;
+      const next = text[i + run];
+      out += "\\".repeat(next === "\"" || next === undefined ? run * 2 : run);
+      i += run - 1;
+    } else if (ch === "\"") {
+      out += "\\\"";
+    } else {
+      out += ch;
+    }
+  }
+  return out + "\"";
+};
 // PHP single-quoted literal.
 const phpSingle = (s) => "'" + String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'";
 
@@ -45,12 +66,16 @@ function buildCurl({ base, key, model, message, os }) {
   const url = `${base}/chat/completions`;
   const body = chatBody({ model, message });
   if (os === "windows") {
+    // Command Prompt (cmd.exe): curl.exe ships with Windows 10+; the JSON is
+    // quoted with the MSVC argv rules (backslash runs doubled only before
+    // quotes, embedded quotes as \") so curl.exe receives the exact bytes, and
+    // ^ continues the line both pasted interactively and inside a .cmd file.
     return [
-      "# Windows PowerShell — use curl.exe (plain \"curl\" is an alias for Invoke-WebRequest)",
-      `curl.exe "${url}" \``,
-      `  -H "Content-Type: application/json" \``,
-      `  -H "Authorization: Bearer ${key}" \``,
-      `  -d ${psSingle(body)}`,
+      "REM Windows Command Prompt (cmd.exe)",
+      `curl.exe "${url}" ^`,
+      `  -H "Content-Type: application/json" ^`,
+      `  -H "Authorization: Bearer ${key}" ^`,
+      `  -d ${winQuote(body)}`,
     ].join("\n");
   }
   return [
@@ -266,7 +291,7 @@ export function buildUsageExample({
     case "curl":
     default:
       code = buildCurl(ctx);
-      filename = os === "windows" ? "chat.ps1" : "chat.sh";
+      filename = os === "windows" ? "chat.cmd" : "chat.sh";
       break;
   }
   return { code: `${code}\n`, filename };
