@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Input, PageLoading, Toggle } from "@/shared/components";
+import { Button, Card, CardSkeleton, Input, Toggle } from "@/shared/components";
 
 const TEXTAREA_CLASS =
   "w-full min-h-[110px] py-2.5 px-3 text-sm text-text-main bg-surface-2 rounded-[10px] " +
@@ -178,37 +178,39 @@ export default function SystemPromptClient() {
     }
   };
 
-  if (loading) return <PageLoading />;
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">edit_note</span>
-            System Prompt
-          </h2>
-          <p className="text-sm text-text-muted mt-1">
-            Append a system prompt to every routed chat request. Layers stack in order:
-            universal, then provider, then model. Empty scopes are ignored.
-          </p>
-        </div>
-        <Button icon="save" onClick={handleSave} loading={saving}>
-          Save
-        </Button>
-      </div>
-
+    <div className="flex flex-col gap-6">
       <Card>
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="min-w-0 flex-1">
             <p className="font-medium">Enable system prompt injection</p>
             <p className="text-sm text-text-muted">
-              When off, nothing is injected regardless of the scopes below. Injection is
+              Layers stack in order (universal, then provider, then model) and are appended
+              to every routed chat request. Off means nothing is injected; injection is
               fail-open and skips requests that already carry the same text.
             </p>
           </div>
-          <Toggle checked={enabled} onChange={setEnabled} />
+          <div className="flex items-center gap-3 shrink-0">
+            <Toggle checked={enabled} onChange={setEnabled} />
+            <Button icon="save" onClick={handleSave} loading={saving}>
+              Save
+            </Button>
+          </div>
         </div>
+        {message && (
+          <p className={`text-sm mt-3 ${message.kind === "ok" ? "text-success" : "text-red-500"}`}>
+            {message.text}
+          </p>
+        )}
       </Card>
 
       <Card title="Universal" subtitle="Applies to every model and provider.">
@@ -257,12 +259,6 @@ export default function SystemPromptClient() {
           <option key={value} value={value} />
         ))}
       </datalist>
-
-      {message && (
-        <p className={`text-sm ${message.kind === "ok" ? "text-success" : "text-red-500"}`}>
-          {message.text}
-        </p>
-      )}
     </div>
   );
 }

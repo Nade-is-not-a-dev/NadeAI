@@ -120,6 +120,13 @@ const getPageInfo = (pathname) => {
       icon: "savings",
       breadcrumbs: [],
     };
+  if (pathname.includes("/system-prompt"))
+    return {
+      title: "System Prompt",
+      description: "Inject extra system instructions into every routed request",
+      icon: "edit_note",
+      breadcrumbs: [],
+    };
   if (pathname.includes("/cli-tools"))
     return {
       title: "CLI Tools",
