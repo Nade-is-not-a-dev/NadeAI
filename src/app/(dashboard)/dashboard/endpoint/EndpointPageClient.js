@@ -19,6 +19,7 @@ import StatusAlert from "./components/StatusAlert";
 import Tooltip from "./components/Tooltip";
 import SecurityWarning from "./components/SecurityWarning";
 import KeyAccessControls from "./components/KeyAccessControls";
+import UsageExamplesCard from "./components/UsageExamplesCard";
 export default function APIPageClient({ machineId }) {
   const [keys, setKeys] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -974,6 +975,9 @@ export default function APIPageClient({ machineId }) {
           </div>
         )}
       </Card>
+
+      {/* Usage Examples */}
+      <UsageExamplesCard baseUrl={currentEndpoint} keys={keys} />
 
       {/* API Keys */}
       <Card id="require-api-key">
