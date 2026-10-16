@@ -5,6 +5,7 @@
 - **System Prompt**: click-to-add scope pickers — "Add provider" lists the providers that can route right now (active connections, no-auth free providers, compatible nodes with models); "Add model" reuses the Combo & Vision Adapter picker (combos hidden — a combo expands before routing, so its name could never match; node display prefixes are stored as the node id)
 - **Dashboard**: "Usage Examples" playground between API Endpoint and API Keys on the Endpoint page — copy/download-ready cURL / Node.js / Python / PHP / Go snippets with the endpoint and an active API key filled in, model picker + editable message, and OS tabs (Windows vs Linux/macOS) that adjust each command
 - **Dashboard**: optional CDN serving for provider icons — build with NEXT_PUBLIC_ICON_BASE (e.g. a jsDelivr mirror of this repo) to load icons from the CDN edge, with per-image fallback to the server's own copy
+- **Dashboard**: show the build commit next to the version (sidebar `v0.5.x · <sha>`, full SHA in the tooltip; also on the profile footer and in `/api/version` as `commit`) — baked from the git checkout at build time
 
 ## Fixes
 - **Dashboard**: provider icons (and /icons/*) are served with a 7-day browser cache instead of Next's default max-age=0, which re-validated every icon on every load as a conditional GET; requests outside the allowlist still fall through to Next unchanged

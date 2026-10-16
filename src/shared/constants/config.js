@@ -5,6 +5,10 @@ export const APP_CONFIG = {
   name: "9Router Proxy",
   description: "AI Infrastructure Management",
   version: pkg.version,
+  // Commit this build was made from. next.config.mjs bakes BUILD_GIT_SHA at
+  // build time; start.sh passes NEXT_PUBLIC_BUILD_SHA explicitly as a second
+  // source. "" (no git checkout) hides the commit display.
+  commit: process.env.NEXT_PUBLIC_BUILD_SHA || process.env.BUILD_GIT_SHA || "",
 };
 
 // GitHub configuration

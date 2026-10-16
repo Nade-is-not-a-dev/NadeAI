@@ -129,7 +129,15 @@ export default function Sidebar({ onClose }) {
               <h1 className="text-lg font-semibold tracking-tight text-text-main">
                 {APP_CONFIG.name}
               </h1>
-              <span className="text-xs text-text-muted">v{APP_CONFIG.version}</span>
+              <span
+                className="text-xs text-text-muted"
+                title={APP_CONFIG.commit ? `commit ${APP_CONFIG.commit}` : undefined}
+              >
+                v{APP_CONFIG.version}
+                {APP_CONFIG.commit && (
+                  <span className="font-mono"> · {APP_CONFIG.commit.slice(0, 7)}</span>
+                )}
+              </span>
             </div>
           </Link>
           {updateInfo && (

@@ -1644,7 +1644,7 @@ export default function ProfilePage() {
 
         {/* App Info */}
         <div className="text-center text-xs sm:text-sm text-text-muted py-4">
-          <p>{APP_CONFIG.name} v{APP_CONFIG.version}</p>
+          <p>{APP_CONFIG.name} v{APP_CONFIG.version}{APP_CONFIG.commit ? ` · ${APP_CONFIG.commit.slice(0, 7)}` : ""}</p>
           <p className="mt-1">{isRemoteHost ? "Remote Mode" : "Local Mode - All data stored on your machine"}</p>
         </div>
       </div>

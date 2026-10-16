@@ -56,6 +56,8 @@ export async function GET() {
   const latestVersion = await getLatestVersionCached();
   const currentVersion = pkg.version;
   const hasUpdate = latestVersion ? compareVersions(latestVersion, currentVersion) > 0 : false;
+  // Commit the running build was made from (baked at build time; "" without git).
+  const commit = process.env.BUILD_GIT_SHA || "";
 
-  return Response.json({ currentVersion, latestVersion, hasUpdate });
+  return Response.json({ currentVersion, latestVersion, hasUpdate, commit });
 }

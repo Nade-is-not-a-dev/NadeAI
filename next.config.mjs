@@ -1,7 +1,21 @@
+import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
+
+// Commit the app is built from, baked into every bundle (client + server) so
+// the dashboard and /api/version can show which revision an instance runs.
+// Empty when building without a git checkout (packaged tarballs, docker COPY).
+const buildGitSha = (() => {
+  try {
+    return execSync("git rev-parse HEAD", { cwd: projectRoot, stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+  } catch {
+    return "";
+  }
+})();
 // CLI bundling needs workspace root so tracing includes hoisted node_modules (slim ~50MB).
 // Docker / default uses projectRoot so server.js lands at /app/server.js (not nested).
 const tracingRoot = process.env.NEXT_TRACING_ROOT_MODE === "workspace"
@@ -34,7 +48,9 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  env: {},
+  env: {
+    BUILD_GIT_SHA: buildGitSha
+  },
   experimental: {
     // #1529/#1572: LLM clients can send long context or base64 image payloads through /v1 rewrites.
     proxyClientMaxBodySize,
