@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { resolveSystemPrompt, applySystemPrompt } from "../../open-sse/services/systemPrompt.js";
+import { PROVIDER_ALIASES_BY_ID, resolveProviderAlias } from "../../open-sse/services/model.js";
 import { FORMATS } from "../../open-sse/translator/formats.js";
 
 const cfg = (over = {}) => ({
@@ -40,6 +41,22 @@ describe("resolveSystemPrompt", () => {
     expect(resolveSystemPrompt(cfg({ models: { "oc/other": "M" } }), target).text).toBe("");
   });
 
+  it("matches registry alias spellings that route to the provider", () => {
+    const dsTarget = { provider: "deepseek", alias: "deepseek", aliases: ["ds"], model: "chat-v9" };
+    expect(resolveSystemPrompt(cfg({ providers: { ds: "P" } }), dsTarget).text).toBe("P");
+    expect(resolveSystemPrompt(cfg({ models: { "ds/chat-v9": "M" } }), dsTarget).text).toBe("M");
+    // a spelling that routes elsewhere is not accepted
+    expect(resolveSystemPrompt(cfg({ models: { "zq/chat-v9": "M" } }), dsTarget).text).toBe("");
+  });
+
+  it("prefers the provider id when both id and alias keys are configured", () => {
+    const config = cfg({
+      providers: { opencode: "ID", oc: "ALIAS" },
+      models: { "opencode/grok-code-fast-1": "MID", "oc/grok-code-fast-1": "MALIAS" },
+    });
+    expect(resolveSystemPrompt(config, target).text).toBe("ID\n\nMID");
+  });
+
   it("ignores blank and non-string values", () => {
     const config = cfg({ universal: "   ", providers: { opencode: 42 }, models: { "oc/grok-code-fast-1": null } });
     expect(resolveSystemPrompt(config, target).text).toBe("");
@@ -49,6 +66,28 @@ describe("resolveSystemPrompt", () => {
     expect(resolveSystemPrompt(null, target).text).toBe("");
     expect(resolveSystemPrompt(cfg(), {}).text).toBe("");
     expect(resolveSystemPrompt(cfg({ providers: "nope", models: 7 }), target).text).toBe("");
+  });
+});
+
+describe("PROVIDER_ALIASES_BY_ID", () => {
+  it("lists the router's spellings for known providers", () => {
+    expect(PROVIDER_ALIASES_BY_ID.opencode).toContain("oc");
+    expect(PROVIDER_ALIASES_BY_ID.deepseek).toContain("ds");
+    expect(PROVIDER_ALIASES_BY_ID["cloudflare-ai"]).toContain("cf");
+  });
+
+  it("every listed spelling routes back to its provider", () => {
+    for (const [id, spellings] of Object.entries(PROVIDER_ALIASES_BY_ID)) {
+      for (const spelling of spellings) {
+        expect(resolveProviderAlias(spelling)).toBe(id);
+      }
+    }
+  });
+
+  it("does not claim spellings that route to another provider", () => {
+    // mimo-free's UI alias `mmf` collides with the `mmf` provider id, so it
+    // must not be listed as a mimo-free spelling.
+    expect(PROVIDER_ALIASES_BY_ID["mimo-free"] || []).not.toContain("mmf");
   });
 });
 

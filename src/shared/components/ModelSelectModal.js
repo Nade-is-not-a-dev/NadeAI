@@ -89,6 +89,7 @@ export default function ModelSelectModal({
   addedModelValues = [],
   closeOnSelect = true,
   allowProviderWildcard = false,
+  hideCombos = false,
 }) {
   // Live-fetched connections on modal open, fallback to activeProviders prop
   const [fetchedConnections, setFetchedConnections] = useState(null);
@@ -505,12 +506,15 @@ export default function ModelSelectModal({
   // Parse search query into structured query (regex, positive tokens, negative tokens)
   const parsedQuery = useMemo(() => parseSearchQuery(searchQuery), [searchQuery]);
 
-  // Filter combos by search query (and hide combos when kindFilter is set — combos are LLM-only by design)
+  // Filter combos by search query (and hide combos when kindFilter is set — combos are LLM-only by design).
+  // hideCombos: for callers whose entries are matched against a resolved
+  // provider/model later (e.g. system-prompt model scopes) — a combo name is
+  // expanded to its members before routing, so a combo entry could never match.
   const filteredCombos = useMemo(() => {
-    if (kindFilter || capFilter) return [];
+    if (kindFilter || capFilter || hideCombos) return [];
     if (parsedQuery.isEmpty) return combos;
     return combos.filter(c => matchesSearch(c.name, parsedQuery));
-  }, [combos, parsedQuery, kindFilter, capFilter]);
+  }, [combos, parsedQuery, kindFilter, capFilter, hideCombos]);
 
   // Sort models alphabetically, with added models floated to top
   const sortModels = (models) => {
@@ -879,4 +883,5 @@ ModelSelectModal.propTypes = {
   addedModelValues: PropTypes.arrayOf(PropTypes.string),
   closeOnSelect: PropTypes.bool,
   allowProviderWildcard: PropTypes.bool,
+  hideCombos: PropTypes.bool,
 };

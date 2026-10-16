@@ -8,6 +8,10 @@
 //     models:    { ["providerId/model" | "alias/model"]: string }
 //   }
 //
+// Scope keys match every spelling the router accepts for the provider -- the
+// provider id, the runtime alias, and registry aliases such as `ds` / `cf` --
+// so any key that routes also selects its scope.
+//
 // Matching layers are concatenated in order (universal -> provider -> model) and
 // appended to the request's system message on the final translated body, just
 // before dispatch -- the same stage as the token-saver injectors and through the
@@ -30,21 +34,38 @@ function fromMap(map, key) {
 
 /**
  * Resolve the effective prompt for a provider/model pair.
- * `provider` is the provider id, `alias` the routing alias (e.g. `oc`); model
- * keys match in either form so configs do not need to know which one the user
- * typed. Layers stack: universal first, then provider, then model.
+ * `provider` is the provider id, `alias` the runtime alias (e.g. `oc`), and
+ * `aliases` any additional routable spellings for the same provider (registry
+ * aliases like `ds` / `cf`). Every spelling selects the same scope, so configs
+ * do not need to know which form the user typed. Layers stack: universal
+ * first, then provider, then model.
  *
  * @returns {{ text: string, scopes: string[] }}
  */
-export function resolveSystemPrompt(config, { provider, alias, model } = {}) {
+export function resolveSystemPrompt(config, { provider, alias, aliases, model } = {}) {
   try {
     if (!config || typeof config !== "object" || config.enabled !== true) {
       return { text: "", scopes: [] };
     }
+    // Accepted spellings, in lookup order: provider id, runtime alias, then any
+    // remaining routable aliases. The first configured spelling wins.
+    const keys = [];
+    for (const key of [provider, alias, ...(Array.isArray(aliases) ? aliases : [])]) {
+      if (key && !keys.includes(key)) keys.push(key);
+    }
     const universal = asText(config.universal);
-    const providerText = fromMap(config.providers, provider) || fromMap(config.providers, alias);
-    const modelText = fromMap(config.models, model && provider ? `${provider}/${model}` : "")
-      || fromMap(config.models, model && alias ? `${alias}/${model}` : "");
+    let providerText = "";
+    for (const key of keys) {
+      providerText = fromMap(config.providers, key);
+      if (providerText) break;
+    }
+    let modelText = "";
+    if (model) {
+      for (const key of keys) {
+        modelText = fromMap(config.models, `${key}/${model}`);
+        if (modelText) break;
+      }
+    }
     const scopes = [];
     if (universal) scopes.push("universal");
     if (providerText) scopes.push(`provider:${provider}`);
@@ -63,9 +84,9 @@ export function resolveSystemPrompt(config, { provider, alias, model } = {}) {
  *
  * @returns {{ scopes: string[], chars: number } | null} null when nothing applies
  */
-export function applySystemPrompt(body, format, config, { provider, alias, model } = {}) {
+export function applySystemPrompt(body, format, config, { provider, alias, aliases, model } = {}) {
   try {
-    const { text, scopes } = resolveSystemPrompt(config, { provider, alias, model });
+    const { text, scopes } = resolveSystemPrompt(config, { provider, alias, aliases, model });
     if (!text) return null;
     injectSystemPrompt(body, format, text);
     return { scopes, chars: text.length };

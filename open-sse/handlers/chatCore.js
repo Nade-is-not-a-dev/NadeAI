@@ -25,6 +25,7 @@ import { takeRenamedToolNames } from "../utils/opencodeFingerprint.js";
 import { injectCaveman } from "../rtk/caveman.js";
 import { injectPonytail } from "../rtk/ponytail.js";
 import { applySystemPrompt } from "../services/systemPrompt.js";
+import { PROVIDER_ALIASES_BY_ID } from "../services/model.js";
 import { compressMessages, formatRtkLog } from "../rtk/index.js";
 import { compressWithHeadroom, formatHeadroomLog, formatHeadroomSizeLog, isHeadroomPhantomSavings } from "../rtk/headroom.js";
 import { compressWithPxpipe } from "../rtk/pxpipe.js";
@@ -324,8 +325,12 @@ export async function handleChatCore({ body, modelInfo, credentials, log, onCred
 
   // System prompt: user-configured injection (universal / per-provider / per-model).
   // Runs on the final body like the savers above but is not a token saver -- it is
-  // independent of the per-request token-saver opt-out header.
-  const sysPromptApplied = applySystemPrompt(translatedBody, finalFormat, systemPrompts, { provider, alias, model });
+  // independent of the per-request token-saver opt-out header. Scope keys match
+  // every routable spelling for the provider (id, alias, registry aliases).
+  const sysPromptApplied = applySystemPrompt(translatedBody, finalFormat, systemPrompts, {
+    provider, alias, model,
+    aliases: PROVIDER_ALIASES_BY_ID[provider] || [],
+  });
   if (sysPromptApplied) xf.push(`SYSPROMPT:${sysPromptApplied.scopes.join("+")}`);
 
   if (xf.length && log?.line) log.line(reqTag, "⚙", xf.join(" · "));

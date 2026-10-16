@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button, Card, CardSkeleton, Input, Toggle } from "@/shared/components";
+import { useEffect, useMemo, useState } from "react";
+import { Button, Card, CardSkeleton, Input, ModelSelectModal, Toggle } from "@/shared/components";
+import ProviderSelectModal from "./components/ProviderSelectModal";
+import { buildNodeIndex, toStoredModelKey, toPickerModelValue } from "@/shared/utils/scopeKeys";
 
 const TEXTAREA_CLASS =
   "w-full min-h-[110px] py-2.5 px-3 text-sm text-text-main bg-surface-2 rounded-[10px] " +
@@ -34,6 +36,7 @@ function ScopeSection({
   emptyText,
   rows,
   setRows,
+  onAdd,
 }) {
   const update = (index, patch) =>
     setRows((prev) => prev.map((row, i) => (i === index ? { ...row, ...patch } : row)));
@@ -76,7 +79,7 @@ function ScopeSection({
           variant="secondary"
           size="sm"
           icon="add"
-          onClick={() => setRows((prev) => [...prev, { key: "", value: "" }])}
+          onClick={onAdd}
         >
           {addLabel}
         </Button>
@@ -96,6 +99,10 @@ export default function SystemPromptClient() {
   const [modelRows, setModelRows] = useState([]);
   const [providerOptions, setProviderOptions] = useState([]);
   const [modelOptions, setModelOptions] = useState([]);
+  const [providerNodes, setProviderNodes] = useState([]);
+  const [modelAliases, setModelAliases] = useState({});
+  const [showProviderPicker, setShowProviderPicker] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -118,27 +125,43 @@ export default function SystemPromptClient() {
       }
     };
 
-    // Suggestions for the key inputs: provider ids/aliases, routed/full model names.
+    // Suggestions for the key inputs (provider ids/aliases, routed/full model
+    // names) plus picker data: provider nodes for key normalization (a node's
+    // display prefix routes as the node id, which is what scope keys match),
+    // and model aliases for the model picker.
     const loadSuggestions = async () => {
       try {
-        const res = await fetch("/api/models", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = await res.json();
-        const models = Array.isArray(data?.models) ? data.models : [];
-        const providers = new Set();
-        const names = new Set();
-        for (const m of models) {
-          if (m?.provider) providers.add(m.provider);
-          if (typeof m?.routedModel === "string") {
-            names.add(m.routedModel);
-            const alias = m.routedModel.split("/")[0];
-            if (alias) providers.add(alias);
+        const [modelsRes, nodesRes, aliasesRes] = await Promise.all([
+          fetch("/api/models", { cache: "no-store" }),
+          fetch("/api/provider-nodes", { cache: "no-store" }),
+          fetch("/api/models/alias", { cache: "no-store" }),
+        ]);
+        if (modelsRes.ok) {
+          const data = await modelsRes.json();
+          const models = Array.isArray(data?.models) ? data.models : [];
+          const providers = new Set();
+          const names = new Set();
+          for (const m of models) {
+            if (m?.provider) providers.add(m.provider);
+            if (typeof m?.routedModel === "string") {
+              names.add(m.routedModel);
+              const alias = m.routedModel.split("/")[0];
+              if (alias) providers.add(alias);
+            }
+            if (typeof m?.fullModel === "string") names.add(m.fullModel);
           }
-          if (typeof m?.fullModel === "string") names.add(m.fullModel);
+          if (cancelled) return;
+          setProviderOptions([...providers].sort());
+          setModelOptions([...names].sort());
         }
-        if (cancelled) return;
-        setProviderOptions([...providers].sort());
-        setModelOptions([...names].sort());
+        if (nodesRes.ok) {
+          const data = await nodesRes.json();
+          if (!cancelled) setProviderNodes(Array.isArray(data?.nodes) ? data.nodes : []);
+        }
+        if (aliasesRes.ok) {
+          const data = await aliasesRes.json();
+          if (!cancelled) setModelAliases(data?.aliases || {});
+        }
       } catch {
         // Suggestions are optional; the key inputs stay free-text.
       }
@@ -150,6 +173,44 @@ export default function SystemPromptClient() {
       cancelled = true;
     };
   }, []);
+
+  // Node display prefix -> node id index for scope-key conversion around the
+  // model picker (see src/shared/utils/scopeKeys.js).
+  const nodeIndex = useMemo(() => buildNodeIndex(providerNodes), [providerNodes]);
+
+  const addProviderScope = (entry) => {
+    const key = (entry?.key || "").trim();
+    if (!key) return;
+    setProviderRows((prev) =>
+      prev.some((row) => row.key.trim().toLowerCase() === key.toLowerCase())
+        ? prev
+        : [...prev, { key, value: "" }]
+    );
+  };
+
+  const addModelScope = (model) => {
+    const key = toStoredModelKey(model?.value || model?.name || model, nodeIndex);
+    if (!key) return;
+    setModelRows((prev) =>
+      prev.some((row) => row.key.trim().toLowerCase() === key.toLowerCase())
+        ? prev
+        : [...prev, { key, value: "" }]
+    );
+  };
+
+  // Picker values for already-added model rows, so the picker can mark them as
+  // selected (node-id keys are shown there under their display prefix).
+  const modelPickerAdded = useMemo(() => {
+    const out = new Set();
+    for (const row of modelRows) {
+      const key = (row.key || "").trim();
+      if (!key) continue;
+      out.add(key);
+      const pickerValue = toPickerModelValue(key, nodeIndex);
+      if (pickerValue && pickerValue !== key) out.add(pickerValue);
+    }
+    return [...out];
+  }, [modelRows, nodeIndex]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -226,7 +287,7 @@ export default function SystemPromptClient() {
       <ScopeSection
         title="Per provider"
         description="One prompt per provider. Applies to every model routed through it."
-        hint="Key: provider id (e.g. opencode) or routing alias (e.g. oc)."
+        hint={'Key: provider id (e.g. opencode) or routing alias (e.g. oc). Use "Add provider" to pick from active providers.'}
         listId="sp-provider-options"
         placeholderKey="provider id or alias, e.g. oc"
         placeholderValue="System prompt for this provider..."
@@ -234,12 +295,13 @@ export default function SystemPromptClient() {
         emptyText="No provider-specific prompts."
         rows={providerRows}
         setRows={setProviderRows}
+        onAdd={() => setShowProviderPicker(true)}
       />
 
       <ScopeSection
         title="Per model"
         description="Most specific layer. Applies only to the listed model."
-        hint='Key: "alias/model" (e.g. oc/grok-code-fast-1) or "provider/model".'
+        hint={'Key: "alias/model" (e.g. oc/grok-code-fast-1) or "provider/model". Use "Add model" to pick from active providers.'}
         listId="sp-model-options"
         placeholderKey="alias/model, e.g. oc/grok-code-fast-1"
         placeholderValue="System prompt for this model..."
@@ -247,6 +309,7 @@ export default function SystemPromptClient() {
         emptyText="No model-specific prompts."
         rows={modelRows}
         setRows={setModelRows}
+        onAdd={() => setShowModelPicker(true)}
       />
 
       <datalist id="sp-provider-options">
@@ -259,6 +322,28 @@ export default function SystemPromptClient() {
           <option key={value} value={value} />
         ))}
       </datalist>
+
+      {showProviderPicker && (
+        <ProviderSelectModal
+          isOpen={showProviderPicker}
+          onClose={() => setShowProviderPicker(false)}
+          onAdd={addProviderScope}
+          addedKeys={providerRows.map((row) => row.key)}
+        />
+      )}
+
+      {showModelPicker && (
+        <ModelSelectModal
+          isOpen={showModelPicker}
+          onClose={() => setShowModelPicker(false)}
+          onSelect={addModelScope}
+          modelAliases={modelAliases}
+          title="Add Model Scope"
+          addedModelValues={modelPickerAdded}
+          closeOnSelect={false}
+          hideCombos
+        />
+      )}
     </div>
   );
 }

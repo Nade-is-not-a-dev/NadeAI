@@ -17,6 +17,22 @@ for (const entry of REGISTRY) {
   for (const a of entry.aliases || []) ALIAS_TO_PROVIDER_ID[a] = entry.id;
 }
 
+// Every non-id spelling the router accepts per provider id — the inverse of
+// ALIAS_TO_PROVIDER_ID, so a spelling is listed exactly when `spelling/...`
+// routes to that provider. Used by system-prompt scope matching so any
+// routable spelling selects the same scope (e.g. `ds/...` for deepseek,
+// `cf/...` for cloudflare-ai); colliding spellings follow the router (a
+// spelling already claimed by another provider id is not re-listed).
+export const PROVIDER_ALIASES_BY_ID = (() => {
+  const out = {};
+  for (const [spelling, id] of Object.entries(ALIAS_TO_PROVIDER_ID)) {
+    if (spelling === id) continue;
+    const list = out[id] || (out[id] = []);
+    list.push(spelling);
+  }
+  return out;
+})();
+
 const BUILTIN_MODEL_ALIASES = {
   "grok-build": "gcli/grok-build",
 };

@@ -2,6 +2,10 @@
 
 ## Features
 - **System Prompt**: inject a configurable system prompt into every routed chat request, scoped universal / per-provider / per-model (new dashboard page under System Prompt); layers stack in order, applied to the final translated body, fail-open, deduped
+- **System Prompt**: click-to-add scope pickers — "Add provider" lists the providers that can route right now (active connections, no-auth free providers, compatible nodes with models); "Add model" reuses the Combo & Vision Adapter picker (combos hidden — a combo expands before routing, so its name could never match; node display prefixes are stored as the node id)
+
+## Fixes
+- **System Prompt**: scope keys match every spelling the router accepts for a provider (id, runtime alias, registry aliases like `ds` / `cf`), so keys copied from the pickers or from routed model names select their scope
 
 # v0.5.104 (2026-10-15)
 
