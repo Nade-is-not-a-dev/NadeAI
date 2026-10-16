@@ -100,11 +100,25 @@ describe("applySystemPrompt", () => {
     ],
   });
 
-  it("appends to an existing OpenAI system message", () => {
+  it("prepends ahead of the existing OpenAI system message", () => {
     const body = openaiBody();
     const applied = applySystemPrompt(body, FORMATS.OPENAI, cfg({ universal: "U" }), target);
     expect(applied).toEqual({ scopes: ["universal"], chars: 1 });
-    expect(body.messages[0].content).toBe("base\n\nU");
+    expect(body.messages[0].content).toBe("U\n\nbase");
+  });
+
+  it("keeps the router layers above the client's system text", () => {
+    const body = {
+      model: "opencode/grok-code-fast-1",
+      messages: [
+        { role: "system", content: "client-base" },
+        { role: "user", content: "hi" },
+      ],
+    };
+    const config = cfg({ universal: "U", providers: { opencode: "P" }, models: { "oc/grok-code-fast-1": "M" } });
+    applySystemPrompt(body, FORMATS.OPENAI, config, target);
+    expect(body.messages[0].content).toBe("U\n\nP\n\nM\n\nclient-base");
+    expect(body.messages[1]).toEqual({ role: "user", content: "hi" });
   });
 
   it("creates a system message when the OpenAI request has none", () => {
@@ -117,32 +131,34 @@ describe("applySystemPrompt", () => {
   it("handles Claude system strings and block arrays", () => {
     const asString = { system: "base", messages: [] };
     applySystemPrompt(asString, FORMATS.CLAUDE, cfg({ universal: "U" }), target);
-    expect(asString.system).toBe("base\n\nU");
+    expect(asString.system).toBe("U\n\nbase");
 
     const asBlocks = { system: [{ type: "text", text: "base" }], messages: [] };
     applySystemPrompt(asBlocks, FORMATS.CLAUDE, cfg({ universal: "U" }), target);
     expect(asBlocks.system).toHaveLength(2);
-    expect(asBlocks.system[1]).toEqual({ type: "text", text: "U" });
+    expect(asBlocks.system[0]).toEqual({ type: "text", text: "U" });
+    expect(asBlocks.system[1]).toEqual({ type: "text", text: "base" });
   });
 
   it("handles Gemini systemInstruction parts", () => {
     const body = { contents: [], systemInstruction: { parts: [{ text: "base" }] } };
     applySystemPrompt(body, FORMATS.GEMINI, cfg({ universal: "U" }), target);
     expect(body.systemInstruction.parts).toHaveLength(2);
-    expect(body.systemInstruction.parts[1]).toEqual({ text: "U" });
+    expect(body.systemInstruction.parts[0]).toEqual({ text: "U" });
+    expect(body.systemInstruction.parts[1]).toEqual({ text: "base" });
   });
 
   it("handles OpenAI Responses instructions strings", () => {
     const body = { instructions: "base", input: [] };
     applySystemPrompt(body, FORMATS.OPENAI_RESPONSES, cfg({ universal: "U" }), target);
-    expect(body.instructions).toBe("base\n\nU");
+    expect(body.instructions).toBe("U\n\nbase");
   });
 
   it("is idempotent when applied twice", () => {
     const body = openaiBody();
     applySystemPrompt(body, FORMATS.OPENAI, cfg({ universal: "U" }), target);
     applySystemPrompt(body, FORMATS.OPENAI, cfg({ universal: "U" }), target);
-    expect(body.messages[0].content).toBe("base\n\nU");
+    expect(body.messages[0].content).toBe("U\n\nbase");
   });
 
   it("returns null and leaves the body alone when nothing applies", () => {

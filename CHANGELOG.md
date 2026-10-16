@@ -1,7 +1,7 @@
 # Unreleased
 
 ## Features
-- **System Prompt**: inject a configurable system prompt into every routed chat request, scoped universal / per-provider / per-model (new dashboard page under System Prompt); layers stack in order, applied to the final translated body, fail-open, deduped
+- **System Prompt**: inject a configurable system prompt into every routed chat request, scoped universal / per-provider / per-model (new dashboard page under System Prompt); layers stack in order and are placed ahead of the request's own system prompt (the client's system text follows the router block), applied to the final translated body, fail-open, deduped
 - **System Prompt**: click-to-add scope pickers — "Add provider" lists the providers that can route right now (active connections, no-auth free providers, compatible nodes with models); "Add model" reuses the Combo & Vision Adapter picker (combos hidden — a combo expands before routing, so its name could never match; node display prefixes are stored as the node id)
 - **Dashboard**: "Usage Examples" playground between API Endpoint and API Keys on the Endpoint page — copy/download-ready cURL / Node.js / Python / PHP / Go snippets with the endpoint and an active API key filled in, model picker + editable message, and OS tabs (Windows vs Linux/macOS) that adjust each command
 - **Dashboard**: optional CDN serving for provider icons — build with NEXT_PUBLIC_ICON_BASE (e.g. a jsDelivr mirror of this repo) to load icons from the CDN edge, with per-image fallback to the server's own copy

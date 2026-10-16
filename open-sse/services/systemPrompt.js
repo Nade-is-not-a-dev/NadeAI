@@ -13,10 +13,11 @@
 // so any key that routes also selects its scope.
 //
 // Matching layers are concatenated in order (universal -> provider -> model) and
-// appended to the request's system message on the final translated body, just
-// before dispatch -- the same stage as the token-saver injectors and through the
-// same format-aware injector (rtk/systemInject.js), so OpenAI / Claude / Gemini /
-// Responses / Kiro shapes work for translated and passthrough flows alike.
+// placed ahead of the request's own system prompt on the final translated body
+// (position: "prepend" — the client's own system text follows the router block),
+// just before dispatch -- the same stage as the token-saver injectors and through
+// the same format-aware injector (rtk/systemInject.js), so OpenAI / Claude /
+// Gemini / Responses / Kiro shapes work for translated and passthrough flows alike.
 // Fail-open: a malformed config or body never affects the request.
 
 import { injectSystemPrompt } from "../rtk/systemInject.js";
@@ -88,7 +89,8 @@ export function applySystemPrompt(body, format, config, { provider, alias, alias
   try {
     const { text, scopes } = resolveSystemPrompt(config, { provider, alias, aliases, model });
     if (!text) return null;
-    injectSystemPrompt(body, format, text);
+    // Router layers sit ahead of the client's own system prompt.
+    injectSystemPrompt(body, format, text, { position: "prepend" });
     return { scopes, chars: text.length };
   } catch {
     return null; // fail-open: injection must never break a request

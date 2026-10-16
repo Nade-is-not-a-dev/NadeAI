@@ -471,3 +471,72 @@ describe("system-inject fail-open", () => {
     expect(body.messages[0].content).toContain(afterCaveman);
   });
 });
+
+describe("system-inject position: prepend", () => {
+  it("puts injected text ahead of the existing chat system string", () => {
+    const body = { messages: [{ role: ROLE.SYSTEM, content: "client system" }, { role: ROLE.USER, content: "hi" }] };
+    injectSystemPrompt(body, FORMATS.OPENAI, P1, { position: "prepend" });
+    expect(body.messages[0].content).toBe(`${P1}${SEP}client system`);
+    expect(body.messages[1].role).toBe(ROLE.USER);
+  });
+
+  it("unshifts the block in chat array content", () => {
+    const body = { messages: [{ role: ROLE.SYSTEM, content: [{ type: OPENAI_BLOCK.TEXT, text: "client" }] }] };
+    injectSystemPrompt(body, FORMATS.OPENAI, P1, { position: "prepend" });
+    expect(body.messages[0].content[0]).toEqual({ type: OPENAI_BLOCK.TEXT, text: P1 });
+    expect(body.messages[0].content[1]).toEqual({ type: OPENAI_BLOCK.TEXT, text: "client" });
+  });
+
+  it("prepends the instructions string", () => {
+    const body = { instructions: "client instructions" };
+    injectSystemPrompt(body, FORMATS.OPENAI, P1, { position: "prepend" });
+    expect(body.instructions).toBe(`${P1}${SEP}client instructions`);
+  });
+
+  it("prepends responses input[] content", () => {
+    const body = { input: [{ type: RESPONSES_ITEM.MESSAGE, role: ROLE.SYSTEM, content: [{ type: RESPONSES_ITEM.INPUT_TEXT, text: "client" }] }] };
+    injectSystemPrompt(body, FORMATS.OPENAI_RESPONSES, P1, { position: "prepend" });
+    expect(body.input[0].content[0]).toEqual({ type: RESPONSES_ITEM.INPUT_TEXT, text: P1 });
+    expect(body.input[0].content[1].text).toBe("client");
+  });
+
+  it("prepends claude string and array systems", () => {
+    const asString = { system: "client", messages: [] };
+    injectSystemPrompt(asString, FORMATS.CLAUDE, P1, { position: "prepend" });
+    expect(asString.system).toBe(`${P1}${SEP}client`);
+
+    const asArray = { system: [{ type: CLAUDE_BLOCK.TEXT, text: "client" }], messages: [] };
+    injectSystemPrompt(asArray, FORMATS.CLAUDE, P1, { position: "prepend" });
+    expect(asArray.system[0]).toEqual({ type: CLAUDE_BLOCK.TEXT, text: P1 });
+    expect(asArray.system[1].text).toBe("client");
+  });
+
+  it("prepends gemini parts", () => {
+    const body = { systemInstruction: { parts: [{ text: "client" }] }, contents: [] };
+    injectSystemPrompt(body, FORMATS.GEMINI, P1, { position: "prepend" });
+    expect(body.systemInstruction.parts[0]).toEqual({ text: P1 });
+    expect(body.systemInstruction.parts[1]).toEqual({ text: "client" });
+  });
+
+  it("prepends into the kiro first history user turn", () => {
+    const body = { conversationState: { history: [{ userInputMessage: { content: "client turn", modelId: "m" } }] } };
+    injectSystemPrompt(body, FORMATS.KIRO, P1, { position: "prepend" });
+    expect(body.conversationState.history[0].userInputMessage.content).toBe(`${P1}${SEP}client turn`);
+  });
+
+  it("stays idempotent in prepend mode (retries do not duplicate)", () => {
+    const body = { messages: [{ role: ROLE.SYSTEM, content: "client" }] };
+    injectSystemPrompt(body, FORMATS.OPENAI, P1, { position: "prepend" });
+    injectSystemPrompt(body, FORMATS.OPENAI, P1, { position: "prepend" });
+    expect(body.messages[0].content).toBe(`${P1}${SEP}client`);
+    // a later, different prompt prepends ahead of the first one
+    injectSystemPrompt(body, FORMATS.OPENAI, P2, { position: "prepend" });
+    expect(body.messages[0].content).toBe(`${P2}${SEP}${P1}${SEP}client`);
+  });
+
+  it("default stays append for the other callers (caveman/ponytail)", () => {
+    const body = { messages: [{ role: ROLE.SYSTEM, content: "client" }] };
+    injectSystemPrompt(body, FORMATS.OPENAI, P1);
+    expect(body.messages[0].content).toBe(`client${SEP}${P1}`);
+  });
+});

@@ -255,8 +255,9 @@ export default function SystemPromptClient() {
           <div className="min-w-0 flex-1">
             <p className="font-medium">Enable system prompt injection</p>
             <p className="text-sm text-text-muted">
-              Layers stack in order (universal, then provider, then model) and are appended
-              to every routed chat request. Off means nothing is injected; injection is
+              Layers stack in order (universal, then provider, then model) and are placed
+              ahead of the request&apos;s own system prompt — the client&apos;s system text
+              follows the router block. Off means nothing is injected; injection is
               fail-open and skips requests that already carry the same text.
             </p>
           </div>
