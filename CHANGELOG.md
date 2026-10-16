@@ -1,3 +1,8 @@
+# Unreleased
+
+## Features
+- **System Prompt**: inject a configurable system prompt into every routed chat request, scoped universal / per-provider / per-model (new dashboard page under System Prompt); layers stack in order, applied to the final translated body, fail-open, deduped
+
 # v0.5.104 (2026-10-15)
 
 ## Features

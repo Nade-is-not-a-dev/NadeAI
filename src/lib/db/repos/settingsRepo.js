@@ -64,6 +64,9 @@ const DEFAULT_SETTINGS = {
   pxpipeTimeoutMs: 15000,
   // Per-provider user header overrides applied at dispatch: { [providerId]: { headers: {..} } }
   providerOverrides: {},
+  // System-prompt injection appended to every routed chat request. Matched per
+  // provider id or alias, and per "providerId|alias/model" key; layers stack.
+  systemPrompts: { enabled: false, universal: "", providers: {}, models: {} },
 };
 
 async function readRaw() {
