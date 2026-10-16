@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { getProviderIconSrc, markProviderIconMissing } from "@/shared/utils/providerIcon";
+import { getProviderIconSrc, getIconCdnBase, markProviderIconMissing } from "@/shared/utils/providerIcon";
 
 function resolveSrc(src, providerId) {
   if (providerId) return getProviderIconSrc(providerId);
@@ -23,8 +23,12 @@ export default function ProviderIcon({
 }) {
   const effectiveSrc = resolveSrc(src, providerId);
   const [errored, setErrored] = useState(false);
+  // CDN mode: when a remote icon fails, retry the same icon on this server
+  // before falling back to the text placeholder.
+  const [localSrc, setLocalSrc] = useState(null);
+  const displaySrc = localSrc || effectiveSrc;
 
-  if (!effectiveSrc || errored) {
+  if (!displaySrc || errored) {
     return (
       <span
         className={`inline-flex items-center justify-center font-bold rounded-lg ${className}`.trim()}
@@ -42,7 +46,7 @@ export default function ProviderIcon({
 
   return (
     <img
-      src={effectiveSrc}
+      src={displaySrc}
       alt={alt}
       width={size}
       height={size}
@@ -50,7 +54,12 @@ export default function ProviderIcon({
       loading="lazy"
       decoding="async"
       onError={() => {
-        const m = effectiveSrc.match(/^\/providers\/([^/]+)\.png$/i);
+        const cdnBase = getIconCdnBase();
+        if (cdnBase && !localSrc && String(displaySrc).startsWith(`${cdnBase}/`)) {
+          setLocalSrc(String(displaySrc).slice(cdnBase.length));
+          return;
+        }
+        const m = String(displaySrc).match(/^\/providers\/([^/]+)\.(png|svg)$/i);
         if (m) markProviderIconMissing(m[1]);
         if (providerId) markProviderIconMissing(providerId);
         setErrored(true);

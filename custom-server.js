@@ -13,6 +13,18 @@ const origCreate = http.createServer.bind(http);
 const PEER_TOKEN = crypto.randomBytes(24).toString("hex");
 process.env.NINEROUTER_PEER_TOKEN = PEER_TOKEN;
 
+// Serve /providers/* and /icons/* directly from public/ with a long browser
+// cache (Next's default max-age=0 made every dashboard load re-validate each
+// icon). The module lives in scripts/ and is optional: deployments without it
+// (e.g. stripped standalone bundles) fall back to the Next handler.
+let tryServeStaticIcon = () => false;
+try {
+  const { createStaticIconHandler } = require("./scripts/staticIcons.cjs");
+  tryServeStaticIcon = createStaticIconHandler({ publicDir: path.join(__dirname, "public") });
+} catch (error) {
+  console.warn("[static-icons] disabled:", error && error.message ? error.message : error);
+}
+
 let backgroundRefreshStarted = false;
 
 function startBackgroundTokenRefreshFromCustomServer() {
@@ -54,6 +66,7 @@ http.createServer = (...args) => {
   const rest = args.filter((a) => typeof a !== "function");
   if (!handler) return origCreate(...args);
   const wrapped = (req, res) => {
+    if (tryServeStaticIcon(req, res)) return;
     const socketIp = req.socket && req.socket.remoteAddress ? req.socket.remoteAddress : "";
     const xff = req.headers["x-forwarded-for"];
     const xRealIp = req.headers["x-real-ip"];

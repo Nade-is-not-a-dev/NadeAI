@@ -1,4 +1,4 @@
-import { cpSync, existsSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
@@ -36,6 +36,16 @@ export function copyStandaloneAssets({ projectRoot = process.cwd(), distDir = pr
   if (existsSync(serverWrapperSource)) {
     cpSync(serverWrapperSource, serverWrapperDestination, { force: true });
     console.log(`[standalone-assets] Copied custom-server.js to ${serverWrapperDestination}`);
+  }
+
+  // Static icon handler (long-cache /providers/* and /icons/*), required by
+  // custom-server.js — copy it so standalone deployments get the same serving.
+  const iconHandlerSource = resolve(projectRoot, "scripts", "staticIcons.cjs");
+  const iconHandlerDestination = resolve(standaloneDir, "scripts", "staticIcons.cjs");
+  if (existsSync(iconHandlerSource)) {
+    mkdirSync(resolve(standaloneDir, "scripts"), { recursive: true });
+    cpSync(iconHandlerSource, iconHandlerDestination, { force: true });
+    console.log(`[standalone-assets] Copied staticIcons.cjs to ${iconHandlerDestination}`);
   }
 }
 

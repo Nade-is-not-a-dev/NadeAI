@@ -1,5 +1,15 @@
 // Provider icon paths under /public/providers.
 // Alias related brands; session-cache 404s so one miss never spams again.
+//
+// Optional CDN base: when NEXT_PUBLIC_ICON_BASE is set at build time (e.g.
+// "https://cdn.jsdelivr.net/gh/<user>/<repo>@master/public"), icons are served
+// from that edge instead of this server's /providers/*. Baked into the bundle
+// at build time; empty/unset keeps same-origin serving.
+
+const ICON_BASE = (() => {
+  const raw = typeof process !== "undefined" && process.env ? process.env.NEXT_PUBLIC_ICON_BASE : "";
+  return typeof raw === "string" ? raw.trim().replace(/\/+$/, "") : "";
+})();
 
 const ICON_ALIASES = {
   "perplexity-agent": "perplexity",
@@ -29,10 +39,17 @@ export function resolveProviderIconId(providerId) {
   return aliased;
 }
 
-/** `/providers/{id}.png` or null when previously failed. */
+/** CDN base in use for icon files, or "" for same-origin serving. */
+export function getIconCdnBase() {
+  return ICON_BASE;
+}
+
+/** `/providers/{id}.png` (or the CDN equivalent) or null when previously failed. */
 export function getProviderIconSrc(providerId) {
   const id = resolveProviderIconId(providerId);
-  return id ? `/providers/${id}.png` : null;
+  if (!id) return null;
+  const local = `/providers/${id}.png`;
+  return ICON_BASE ? `${ICON_BASE}${local}` : local;
 }
 
 /** Call from img onError so later mounts skip the request. */
