@@ -41,7 +41,11 @@ const proxyClientMaxBodySize = process.env.NINEROUTER_PROXY_CLIENT_MAX_BODY_SIZE
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
-  output: "standalone",
+  // Default: standalone output (Docker, CLI packaging, `npm run start:bun`).
+  // Deployments that serve via `next start` from a repo checkout can set
+  // NEXT_OUTPUT=default to skip the unused standalone build — that also keeps
+  // Next from warning about `next start` with a standalone config.
+  output: process.env.NEXT_OUTPUT === "default" ? undefined : "standalone",
   // `open` must stay external. It derives its own directory from `import.meta.url`, and
   // webpack replaces that with the absolute path of the BUILD machine as a string literal.
   // A release built on macOS therefore ships `file:///Users/.../open/index.js`, which
