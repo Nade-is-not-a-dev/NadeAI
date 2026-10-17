@@ -5,12 +5,14 @@
 //     enabled: boolean,
 //     universal: string,
 //     providers: { [providerIdOrAlias]: string },
-//     models:    { ["providerId/model" | "alias/model"]: string }
+//     models:    { ["providerId/model" | "alias/model" | requestedId]: string }
 //   }
 //
 // Scope keys match every spelling the router accepts for the provider -- the
 // provider id, the runtime alias, and registry aliases such as `ds` / `cf` --
-// so any key that routes also selects its scope.
+// so any key that routes also selects its scope. An exact requested spelling
+// (a masking alias like `anthropic/claude-fable-5.1`) is also honored in the
+// models map, taking precedence over the resolved spellings.
 //
 // Matching layers are concatenated in order (universal -> provider -> model) and
 // placed ahead of the request's own system prompt on the final translated body
@@ -43,7 +45,7 @@ function fromMap(map, key) {
  *
  * @returns {{ text: string, scopes: string[] }}
  */
-export function resolveSystemPrompt(config, { provider, alias, aliases, model } = {}) {
+export function resolveSystemPrompt(config, { provider, alias, aliases, model, requested } = {}) {
   try {
     if (!config || typeof config !== "object" || config.enabled !== true) {
       return { text: "", scopes: [] };
@@ -61,7 +63,15 @@ export function resolveSystemPrompt(config, { provider, alias, aliases, model } 
       if (providerText) break;
     }
     let modelText = "";
-    if (model) {
+    let requestedScope = "";
+    // The exact requested spelling is the most specific key available: a masked
+    // alias request ("anthropic/claude-fable-5.1" resolved to a real
+    // provider/model) is scoped by the id the client actually asked for.
+    if (typeof requested === "string" && requested) {
+      modelText = fromMap(config.models, requested);
+      if (modelText) requestedScope = requested;
+    }
+    if (!modelText && model) {
       for (const key of keys) {
         modelText = fromMap(config.models, `${key}/${model}`);
         if (modelText) break;
@@ -70,7 +80,7 @@ export function resolveSystemPrompt(config, { provider, alias, aliases, model } 
     const scopes = [];
     if (universal) scopes.push("universal");
     if (providerText) scopes.push(`provider:${provider}`);
-    if (modelText) scopes.push(`model:${alias || provider}/${model}`);
+    if (modelText) scopes.push(`model:${requestedScope || `${alias || provider}/${model}`}`);
     return {
       text: [universal, providerText, modelText].filter(Boolean).join(SEP),
       scopes,
@@ -85,9 +95,9 @@ export function resolveSystemPrompt(config, { provider, alias, aliases, model } 
  *
  * @returns {{ scopes: string[], chars: number } | null} null when nothing applies
  */
-export function applySystemPrompt(body, format, config, { provider, alias, aliases, model } = {}) {
+export function applySystemPrompt(body, format, config, { provider, alias, aliases, model, requested } = {}) {
   try {
-    const { text, scopes } = resolveSystemPrompt(config, { provider, alias, aliases, model });
+    const { text, scopes } = resolveSystemPrompt(config, { provider, alias, aliases, model, requested });
     if (!text) return null;
     // Router layers sit ahead of the client's own system prompt.
     injectSystemPrompt(body, format, text, { position: "prepend" });

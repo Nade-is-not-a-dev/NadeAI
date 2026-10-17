@@ -41,6 +41,26 @@ describe("resolveSystemPrompt", () => {
     expect(resolveSystemPrompt(cfg({ models: { "oc/other": "M" } }), target).text).toBe("");
   });
 
+  it("matches the exact requested alias id for masked models", () => {
+    const maskedTarget = { provider: "opencode", alias: "oc", model: "deepseek-v4.1-flash-free", requested: "anthropic/claude-fable-5.1" };
+    const config = cfg({ models: { "anthropic/claude-fable-5.1": "M" } });
+    const { text, scopes } = resolveSystemPrompt(config, maskedTarget);
+    expect(text).toBe("M");
+    expect(scopes).toEqual(["model:anthropic/claude-fable-5.1"]);
+  });
+
+  it("prefers the exact requested key over resolved spelling keys", () => {
+    const maskedTarget = { provider: "opencode", alias: "oc", model: "deepseek-v4.1-flash-free", requested: "anthropic/claude-fable-5.1" };
+    const config = cfg({ models: { "anthropic/claude-fable-5.1": "MASK", "oc/deepseek-v4.1-flash-free": "REAL" } });
+    expect(resolveSystemPrompt(config, maskedTarget).text).toBe("MASK");
+  });
+
+  it("falls back to resolved spelling keys when the requested key is absent", () => {
+    const maskedTarget = { provider: "opencode", alias: "oc", model: "deepseek-v4.1-flash-free", requested: "anthropic/claude-fable-5.1" };
+    const config = cfg({ models: { "oc/deepseek-v4.1-flash-free": "REAL" } });
+    expect(resolveSystemPrompt(config, maskedTarget).text).toBe("REAL");
+  });
+
   it("matches registry alias spellings that route to the provider", () => {
     const dsTarget = { provider: "deepseek", alias: "deepseek", aliases: ["ds"], model: "chat-v9" };
     expect(resolveSystemPrompt(cfg({ providers: { ds: "P" } }), dsTarget).text).toBe("P");
@@ -126,6 +146,13 @@ describe("applySystemPrompt", () => {
     applySystemPrompt(body, FORMATS.OPENAI, cfg({ universal: "U" }), target);
     expect(body.messages).toHaveLength(2);
     expect(body.messages[0]).toEqual({ role: "system", content: "U" });
+  });
+
+  it("applies a requested alias scope ahead of the client system text", () => {
+    const body = openaiBody();
+    const maskedTarget = { provider: "opencode", alias: "oc", model: "deepseek-v4.1-flash-free", requested: "anthropic/claude-fable-5.1" };
+    applySystemPrompt(body, FORMATS.OPENAI, cfg({ models: { "anthropic/claude-fable-5.1": "M" } }), maskedTarget);
+    expect(body.messages[0].content).toBe("M\n\nbase");
   });
 
   it("handles Claude system strings and block arrays", () => {

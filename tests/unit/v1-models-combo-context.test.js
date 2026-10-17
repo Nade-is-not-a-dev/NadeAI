@@ -81,3 +81,23 @@ describe("/v1/models combo limits", () => {
     });
   });
 });
+
+describe("/v1/models masked alias ids", () => {
+  it("lists slashed alias keys as discoverable model ids", async () => {
+    db.getProviderConnections.mockResolvedValue([]);
+    db.getCombos.mockResolvedValue([]);
+    db.getModelAliases.mockResolvedValue({
+      "anthropic/claude-fable-5.1": "oc/deepseek-v4.1-flash-free",
+      "bare-name": "oc/glm-5.3-flash-free",
+    });
+    try {
+      const models = await buildModelsList(["llm"]);
+      const masked = models.find((m) => m.id === "anthropic/claude-fable-5.1");
+      expect(masked).toEqual({ id: "anthropic/claude-fable-5.1", object: "model", owned_by: "anthropic" });
+      // Bare alias names are not routable model ids on this endpoint.
+      expect(models.find((m) => m.id === "bare-name")).toBeUndefined();
+    } finally {
+      db.getModelAliases.mockResolvedValue({});
+    }
+  });
+});

@@ -39,6 +39,17 @@ export async function getModelInfo(modelStr) {
   const parsed = parseModel(modelStr);
 
   if (!parsed.isAlias) {
+    // Exact alias keys may be full "provider/model" strings — a masking alias
+    // like "anthropic/claude-fable-5.1" → "oc/deepseek-v4.1-flash-free" must
+    // win before the head is parsed as a provider prefix, because the masked
+    // head is intentionally not a routable provider. `viaAlias` carries the
+    // requested spelling for reply rewriting and system-prompt scopes.
+    try {
+      const aliases = await getModelAliases();
+      const exact = resolveModelAliasFromMap(modelStr, aliases);
+      if (exact) return { ...exact, viaAlias: modelStr };
+    } catch { /* alias lookup is best-effort; fall through to normal parsing */ }
+
     // Provider-node prefixes are user-defined. They must not override built-in
     // provider ids/aliases such as `cf`, `cloudflare-ai`, `openai`, or `hf`.
     if (!RESERVED_PROVIDER_PREFIXES.has(parsed.providerAlias)) {

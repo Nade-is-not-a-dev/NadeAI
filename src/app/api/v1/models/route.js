@@ -632,6 +632,21 @@ export async function buildModelsList(kindFilter, options = {}) {
     }
   }
 
+  // Slashed alias keys are routable model ids of their own: a masking alias
+  // like "anthropic/claude-fable-5.1" (whose value resolves to a real
+  // provider/model) must be discoverable by clients, not just resolvable.
+  if (kindFilter.includes(LLM_KIND)) {
+    for (const [aliasId, target] of Object.entries(modelAliases || {})) {
+      if (typeof aliasId !== "string" || typeof target !== "string") continue;
+      const slash = aliasId.indexOf("/");
+      if (slash <= 0 || slash === aliasId.length - 1) continue;
+      const owner = aliasId.slice(0, slash);
+      const bare = aliasId.slice(slash + 1);
+      if (isDisabled(owner, bare)) continue;
+      models.push({ id: aliasId, object: "model", owned_by: owner });
+    }
+  }
+
   const dedupedModels = [];
   const seenModelIds = new Set();
   for (const model of models) {

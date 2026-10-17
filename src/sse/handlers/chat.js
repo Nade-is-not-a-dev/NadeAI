@@ -25,6 +25,7 @@ import * as log from "../utils/logger.js";
 import { updateProviderCredentials, checkAndRefreshToken } from "../services/tokenRefresh.js";
 import { getProjectIdForConnection } from "open-sse/services/projectId.js";
 import { stripModelContextMarker } from "open-sse/utils/modelMarkers.js";
+import { rewriteResponseModelField } from "open-sse/utils/responseModel.js";
 import { getKeyAccessContext, enforceKeyAccess, filterAdapterModels } from "../services/keyAccess.js";
 
 /**
@@ -280,7 +281,7 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
     const providerThinking = (chatSettings.providerThinking || {})[provider] || null;
     const result = await handleChatCore({
       body: { ...body, model: `${provider}/${model}` },
-      modelInfo: { provider, model },
+      modelInfo: { provider, model, viaAlias: modelInfo.viaAlias || null },
       credentials: refreshedCredentials,
       log,
       clientRawRequest,
@@ -324,7 +325,14 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
       }
     });
 
-    if (result.success) return result.response;
+    if (result.success) {
+      // Model masking: a request that resolved through a slashed alias
+      // ("anthropic/claude-fable-5.1") must never show the real upstream
+      // model that served it — echo the id the client asked for.
+      return modelInfo.viaAlias
+        ? await rewriteResponseModelField(result.response, modelInfo.viaAlias)
+        : result.response;
+    }
 
     // Antigravity 409/429: refresh live quota to get exact resetAt before locking
     let quotaResetMs = null;

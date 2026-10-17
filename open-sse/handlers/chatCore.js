@@ -63,7 +63,7 @@ export function stripContinuityFields(body) {
 }
 
 export async function handleChatCore({ body, modelInfo, credentials, log, onCredentialsRefreshed, onRequestSuccess, onDisconnect, clientRawRequest, connectionId, userAgent, apiKey, ccFilterNaming, rtkEnabled, headroomEnabled, headroomUrl, headroomCompressUserMessages, headroomTimeoutMs, cavemanEnabled, cavemanLevel, ponytailEnabled, ponytailLevel, pxpipeEnabled, pxpipeMinChars, pxpipeTimeoutMs, pxpipeTransform, onPxpipeEvent, sourceFormatOverride, providerThinking, providerOverrides, systemPrompts }) {
-  const { provider, model } = modelInfo;
+  const { provider, model, viaAlias = null } = modelInfo;
   const requestStartTime = Date.now();
   // Stable per-session color so all lines of one CLI conversation share a tag
   const sessionSeed = (() => {
@@ -326,10 +326,12 @@ export async function handleChatCore({ body, modelInfo, credentials, log, onCred
   // System prompt: user-configured injection (universal / per-provider / per-model).
   // Runs on the final body like the savers above but is not a token saver -- it is
   // independent of the per-request token-saver opt-out header. Scope keys match
-  // every routable spelling for the provider (id, alias, registry aliases).
+  // every routable spelling for the provider (id, alias, registry aliases) and the
+  // exact requested id for masked alias requests (viaAlias).
   const sysPromptApplied = applySystemPrompt(translatedBody, finalFormat, systemPrompts, {
     provider, alias, model,
     aliases: PROVIDER_ALIASES_BY_ID[provider] || [],
+    requested: viaAlias || undefined,
   });
   if (sysPromptApplied) xf.push(`SYSPROMPT:${sysPromptApplied.scopes.join("+")}`);
 
