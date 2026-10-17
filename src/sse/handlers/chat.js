@@ -26,6 +26,7 @@ import { updateProviderCredentials, checkAndRefreshToken } from "../services/tok
 import { getProjectIdForConnection } from "open-sse/services/projectId.js";
 import { stripModelContextMarker } from "open-sse/utils/modelMarkers.js";
 import { rewriteResponseModelField } from "open-sse/utils/responseModel.js";
+import { isMaskedModel, MASKED_MODEL_ERROR_MESSAGE } from "@/shared/utils/nadeaiModels";
 import { getKeyAccessContext, enforceKeyAccess, filterAdapterModels } from "../services/keyAccess.js";
 
 /**
@@ -175,6 +176,7 @@ export async function handleChat(request, clientRawRequest = null) {
  */
 async function handleSingleModelChat(body, modelStr, clientRawRequest = null, request = null, apiKey = null, requestedModel = null) {
   const modelInfo = await getModelInfo(modelStr);
+  const masked = isMaskedModel(modelStr, modelInfo);
 
   // If provider is null, this might be a combo name - check and handle
   if (!modelInfo.provider) {
@@ -228,6 +230,9 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
       });
     }
     log.warn("CHAT", "Invalid model format", { model: modelStr });
+    if (masked) {
+      return errorResponse(HTTP_STATUS.BAD_REQUEST, MASKED_MODEL_ERROR_MESSAGE);
+    }
     return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid model format");
   }
 
@@ -253,13 +258,22 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
         const errorMsg = lastError || credentials.lastError || "Unavailable";
         const status = HTTP_STATUS.SERVICE_UNAVAILABLE;
         log.warn("CHAT", `[${provider}/${model}] ${errorMsg} (${credentials.retryAfterHuman})`);
+        if (masked) {
+          return unavailableResponse(status, MASKED_MODEL_ERROR_MESSAGE, credentials.retryAfter, credentials.retryAfterHuman, lastHeaders);
+        }
         return unavailableResponse(status, `[${provider}/${model}] ${errorMsg}`, credentials.retryAfter, credentials.retryAfterHuman, lastHeaders);
       }
       if (excludeConnectionIds.size === 0) {
         log.warn("AUTH", `No active credentials for provider: ${provider}`);
+        if (masked) {
+          return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE);
+        }
         return errorResponse(HTTP_STATUS.NOT_FOUND, `No active credentials for provider: ${provider}`);
       }
       log.warn("CHAT", "No more accounts available", { provider });
+      if (masked) {
+        return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE, lastHeaders);
+      }
       return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, lastError || "All accounts unavailable", lastHeaders);
     }
 
@@ -360,6 +374,13 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
       continue;
     }
 
+    if (masked) {
+      return errorResponse(
+        result.status || HTTP_STATUS.BAD_GATEWAY,
+        MASKED_MODEL_ERROR_MESSAGE,
+        upstreamResponseHeaders(result.response?.headers)
+      );
+    }
     return result.response;
   }
 }

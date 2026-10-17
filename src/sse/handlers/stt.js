@@ -4,6 +4,7 @@ import {
 } from "../services/auth.js";
 import { getSettings, getCustomModels } from "@/lib/localDb";
 import { getModelInfo } from "../services/model.js";
+import { isMaskedModel, MASKED_MODEL_ERROR_MESSAGE } from "@/shared/utils/nadeaiModels";
 import { getKeyAccessContext, enforceKeyAccessResolved } from "../services/keyAccess.js";
 import { handleSttCore } from "open-sse/handlers/sttCore.js";
 import { errorResponse, unavailableResponse } from "open-sse/utils/error.js";
@@ -58,7 +59,11 @@ export async function handleStt(request) {
   if (!formData.get("file")) return errorResponse(HTTP_STATUS.BAD_REQUEST, "Missing required field: file");
 
   const modelInfo = await getModelInfo(modelStr);
-  if (!modelInfo.provider) return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid model format");
+  const masked = isMaskedModel(modelStr, modelInfo);
+  if (!modelInfo.provider) {
+    if (masked) return errorResponse(HTTP_STATUS.BAD_REQUEST, MASKED_MODEL_ERROR_MESSAGE);
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid model format");
+  }
 
   const { provider, model } = modelInfo;
 
@@ -74,6 +79,7 @@ export async function handleStt(request) {
   if (!CREDENTIALED_PROVIDERS.has(provider)) {
     const result = await handleSttCore({ provider, model, formData, sttConfig: AI_PROVIDERS[provider]?.sttConfig, transport: modelTransport });
     if (result.success) return result.response;
+    if (masked) return errorResponse(result.status || HTTP_STATUS.BAD_GATEWAY, MASKED_MODEL_ERROR_MESSAGE);
     return errorResponse(result.status || HTTP_STATUS.BAD_GATEWAY, result.error || "STT failed");
   }
 
@@ -89,9 +95,14 @@ export async function handleStt(request) {
       if (credentials?.allRateLimited) {
         const msg = lastError || credentials.lastError || "Unavailable";
         const status = lastStatus || Number(credentials.lastErrorCode) || HTTP_STATUS.SERVICE_UNAVAILABLE;
+        if (masked) return unavailableResponse(status, MASKED_MODEL_ERROR_MESSAGE, credentials.retryAfter, credentials.retryAfterHuman);
         return unavailableResponse(status, `[${provider}/${model}] ${msg}`, credentials.retryAfter, credentials.retryAfterHuman);
       }
-      if (excludeConnectionIds.size === 0) return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
+      if (excludeConnectionIds.size === 0) {
+        if (masked) return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE);
+        return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
+      }
+      if (masked) return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE);
       return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, lastError || "All accounts unavailable");
     }
 
@@ -108,6 +119,7 @@ export async function handleStt(request) {
       lastStatus = result.status;
       continue;
     }
+    if (masked) return errorResponse(result.status || HTTP_STATUS.BAD_GATEWAY, MASKED_MODEL_ERROR_MESSAGE);
     return result.response || errorResponse(result.status, result.error);
   }
 }

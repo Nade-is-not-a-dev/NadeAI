@@ -4,6 +4,7 @@ import {
 } from "../services/auth.js";
 import { getSettings } from "@/lib/localDb";
 import { getModelInfo, getComboModels } from "../services/model.js";
+import { isMaskedModel, MASKED_MODEL_ERROR_MESSAGE } from "@/shared/utils/nadeaiModels";
 import { getKeyAccessContext, enforceKeyAccess } from "../services/keyAccess.js";
 import { handleTtsCore } from "open-sse/handlers/ttsCore.js";
 import { errorResponse, unavailableResponse } from "open-sse/utils/error.js";
@@ -72,7 +73,11 @@ export async function handleTts(request) {
 
 async function handleSingleModelTts(body, modelStr, responseFormat, language, style) {
   const modelInfo = await getModelInfo(modelStr);
-  if (!modelInfo.provider) return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid model format");
+  const masked = isMaskedModel(modelStr, modelInfo);
+  if (!modelInfo.provider) {
+    if (masked) return errorResponse(HTTP_STATUS.BAD_REQUEST, MASKED_MODEL_ERROR_MESSAGE);
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid model format");
+  }
 
   const { provider, model } = modelInfo;
   log.info("ROUTING", `Provider: ${provider}, Voice: ${model}`);
@@ -81,6 +86,7 @@ async function handleSingleModelTts(body, modelStr, responseFormat, language, st
   if (!CREDENTIALED_PROVIDERS.has(provider)) {
     const result = await handleTtsCore({ provider, model, input: body.input, responseFormat, language, style });
     if (result.success) return result.response;
+    if (masked) return errorResponse(result.status || HTTP_STATUS.BAD_GATEWAY, MASKED_MODEL_ERROR_MESSAGE);
     return errorResponse(result.status || HTTP_STATUS.BAD_GATEWAY, result.error || "TTS failed");
   }
 
@@ -96,9 +102,14 @@ async function handleSingleModelTts(body, modelStr, responseFormat, language, st
       if (credentials?.allRateLimited) {
         const msg = lastError || credentials.lastError || "Unavailable";
         const status = lastStatus || Number(credentials.lastErrorCode) || HTTP_STATUS.SERVICE_UNAVAILABLE;
+        if (masked) return unavailableResponse(status, MASKED_MODEL_ERROR_MESSAGE, credentials.retryAfter, credentials.retryAfterHuman);
         return unavailableResponse(status, `[${provider}/${model}] ${msg}`, credentials.retryAfter, credentials.retryAfterHuman);
       }
-      if (excludeConnectionIds.size === 0) return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
+      if (excludeConnectionIds.size === 0) {
+        if (masked) return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE);
+        return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
+      }
+      if (masked) return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE);
       return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, lastError || "All accounts unavailable");
     }
 
@@ -115,6 +126,7 @@ async function handleSingleModelTts(body, modelStr, responseFormat, language, st
       lastStatus = result.status;
       continue;
     }
+    if (masked) return errorResponse(result.status || HTTP_STATUS.BAD_GATEWAY, MASKED_MODEL_ERROR_MESSAGE);
     return result.response || errorResponse(result.status, result.error);
   }
 }

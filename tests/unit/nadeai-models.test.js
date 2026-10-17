@@ -3,6 +3,8 @@
 import { describe, it, expect } from "vitest";
 import {
   composeModelId,
+  isMaskedModel,
+  isMaskedModelId,
   mergeMaskedModels,
   splitModelId,
 } from "@/shared/utils/nadeaiModels.js";
@@ -60,5 +62,48 @@ describe("mergeMaskedModels", () => {
   it("sorts entries by public id", () => {
     const entries = mergeMaskedModels({ "b/x": "oc/x", "a/y": "oc/y" }, {});
     expect(entries.map((e) => e.id)).toEqual(["a/y", "b/x"]);
+  });
+});
+
+describe("isMaskedModelId", () => {
+  it("is true for any slashed id whose head is 'nadeai'", () => {
+    expect(isMaskedModelId("nadeai/claude-fable-5.1")).toBe(true);
+    expect(isMaskedModelId("nadeai/other")).toBe(true);
+  });
+
+  it("is false for other heads and non-slashed ids", () => {
+    expect(isMaskedModelId("oc/deepseek-v4.1-flash-free")).toBe(false);
+    expect(isMaskedModelId("gpt-5")).toBe(false);
+  });
+
+  it("returns false for empty input", () => {
+    expect(isMaskedModelId("")).toBe(false);
+    expect(isMaskedModelId(null)).toBe(false);
+  });
+});
+
+describe("isMaskedModel", () => {
+  it("is true when the request resolved through a slashed alias", () => {
+    expect(
+      isMaskedModel("nadeai/claude-fable-5.1", {
+        provider: "oc",
+        model: "deepseek-v4.1-flash-free",
+        viaAlias: "nadeai/claude-fable-5.1",
+      }),
+    ).toBe(true);
+  });
+
+  it("is true for a nadeai-head id even without alias resolution", () => {
+    expect(isMaskedModel("nadeai/x", { provider: "nadeai", model: "x" })).toBe(true);
+  });
+
+  it("is false for ordinary provider ids", () => {
+    expect(
+      isMaskedModel("oc/deepseek-v4.1-flash-free", {
+        provider: "oc",
+        model: "deepseek-v4.1-flash-free",
+      }),
+    ).toBe(false);
+    expect(isMaskedModel("gpt-5", { provider: "openai", model: "gpt-5" })).toBe(false);
   });
 });

@@ -21,6 +21,24 @@ export function composeModelId(provider, model) {
   return p && m ? `${p}/${m}` : "";
 }
 
+export const MASKED_MODEL_ERROR_MESSAGE =
+  "Model gagal dipanggil. Silakan coba lagi. Jika masih tidak bisa, segera hubungi admin.";
+
+export function isMaskedModelId(id) {
+  const parsed = splitModelId(typeof id === "string" ? id : "");
+  return !!parsed && parsed.provider === "nadeai";
+}
+
+export function isMaskedModel(modelStr, modelInfo) {
+  // A masked model is any request that resolved through a registered slashed
+  // alias (viaAlias is set only for slashed aliases in getModelInfo), so the
+  // real backend stays hidden on every error path. The "nadeai" head check is
+  // kept as a fallback for broken/missing aliases whose public id still uses
+  // the nadeai mask, so they never leak a "no credentials for provider" error.
+  if (modelInfo?.viaAlias) return true;
+  return isMaskedModelId(modelStr);
+}
+
 /** Merge the alias map (public -> real) and per-model prompts into UI entries. */
 export function mergeMaskedModels(aliases, prompts) {
   const entries = [];

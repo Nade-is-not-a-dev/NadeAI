@@ -7,6 +7,7 @@ import {
 } from "../services/auth.js";
 import { getSettings } from "@/lib/localDb";
 import { getModelInfo } from "../services/model.js";
+import { isMaskedModel, MASKED_MODEL_ERROR_MESSAGE } from "@/shared/utils/nadeaiModels";
 import { getKeyAccessContext, enforceKeyAccessResolved } from "../services/keyAccess.js";
 import { handleEmbeddingsCore } from "open-sse/handlers/embeddingsCore.js";
 import { errorResponse, unavailableResponse } from "open-sse/utils/error.js";
@@ -77,8 +78,10 @@ export async function handleEmbeddings(request) {
   }
 
   const modelInfo = await getModelInfo(modelStr);
+  const masked = isMaskedModel(modelStr, modelInfo);
   if (!modelInfo.provider) {
     log.warn("EMBEDDINGS", "Invalid model format", { model: modelStr });
+    if (masked) return errorResponse(HTTP_STATUS.BAD_REQUEST, MASKED_MODEL_ERROR_MESSAGE);
     return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid model format");
   }
 
@@ -108,13 +111,16 @@ export async function handleEmbeddings(request) {
         const errorMsg = lastError || credentials.lastError || "Unavailable";
         const status = lastStatus || Number(credentials.lastErrorCode) || HTTP_STATUS.SERVICE_UNAVAILABLE;
         log.warn("EMBEDDINGS", `[${provider}/${model}] ${errorMsg} (${credentials.retryAfterHuman})`);
+        if (masked) return unavailableResponse(status, MASKED_MODEL_ERROR_MESSAGE, credentials.retryAfter, credentials.retryAfterHuman);
         return unavailableResponse(status, `[${provider}/${model}] ${errorMsg}`, credentials.retryAfter, credentials.retryAfterHuman);
       }
       if (excludeConnectionIds.size === 0) {
         log.error("AUTH", `No credentials for provider: ${provider}`);
+        if (masked) return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE);
         return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
       }
       log.warn("EMBEDDINGS", "No more accounts available", { provider });
+      if (masked) return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, MASKED_MODEL_ERROR_MESSAGE);
       return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, lastError || "All accounts unavailable");
     }
 
@@ -165,6 +171,7 @@ export async function handleEmbeddings(request) {
       continue;
     }
 
+    if (masked) return errorResponse(result.status || HTTP_STATUS.BAD_GATEWAY, MASKED_MODEL_ERROR_MESSAGE);
     return result.response;
   }
 }
