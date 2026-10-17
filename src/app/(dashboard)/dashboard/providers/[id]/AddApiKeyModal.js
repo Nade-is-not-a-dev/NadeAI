@@ -11,6 +11,8 @@ const BULK_PLACEHOLDER = `name1|sk-key1\nname2|sk-key2\nsk-key-only-auto-named`;
 export default function AddApiKeyModal({ isOpen, provider, providerName, isCompatible, isAnthropic, authType, authHint, website, proxyPools, error, existingNames, onSave, onBulkDone, onClose }) {
   const NONE_PROXY_POOL_VALUE = "__none__";
   const isOllamaLocal = provider === "ollama-local";
+  // Self-hosted gateway: host is per-connection, so it gets its own field like ollama-local.
+  const isOpencode2Api = provider === "opencode2api";
   const isCookie = authType === "cookie";
   const isXaiApiKey = provider === "xai" && !isCookie;
   const credentialLabel = isCookie ? "Cookie Value" : provider === "qoder" || provider === "qoder-cn" ? "Personal Access Token (PAT)" : "API Key";
@@ -37,6 +39,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
     priority: 1,
     proxyPoolId: NONE_PROXY_POOL_VALUE,
     ollamaHostUrl: "",
+    gatewayBaseUrl: "",
   });
   const [azureData, setAzureData] = useState({
     azureEndpoint: "",
@@ -68,6 +71,9 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
   const buildProviderSpecificData = () => {
     if (isOllamaLocal && formData.ollamaHostUrl.trim()) {
       return { baseUrl: formData.ollamaHostUrl.trim() };
+    }
+    if (isOpencode2Api && formData.gatewayBaseUrl.trim()) {
+      return { baseUrl: formData.gatewayBaseUrl.trim() };
     }
     if (isAzure) {
       return {
@@ -268,8 +274,16 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
           label="Name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder={isOllamaLocal ? "Ollama Local" : "Production Key"}
+          placeholder={isOllamaLocal ? "Ollama Local" : isOpencode2Api ? "OpenCode2API" : "Production Key"}
         />
+        {isOpencode2Api && (
+          <Input
+            label="Gateway Base URL"
+            value={formData.gatewayBaseUrl}
+            onChange={(e) => setFormData({ ...formData, gatewayBaseUrl: e.target.value })}
+            placeholder="http://127.0.0.1:5678"
+          />
+        )}
         {isOllamaLocal && (
           <div className="flex gap-2">
             <Input
@@ -340,6 +354,11 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
         {isOllamaLocal && (
           <p className="text-xs text-text-muted">
             Leave blank to use <code>http://localhost:11434</code>. For remote Ollama, enter the full host URL (e.g. <code>http://192.168.1.10:11434</code>).
+          </p>
+        )}
+        {isOpencode2Api && (
+          <p className="text-xs text-text-muted">
+            Leave blank for a gateway on this host (<code>http://127.0.0.1:5678</code>). Use the API key field for one of the gateway&apos;s <code>server_keys</code> — it already performs OpenCode&apos;s client fingerprint upstream, so requests through it are not rate-limited by the free-tier gate. A trailing <code>/v1</code> is fine.
           </p>
         )}
         {validationResult && (
