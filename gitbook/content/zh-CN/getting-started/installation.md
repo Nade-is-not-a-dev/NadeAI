@@ -1,6 +1,6 @@
 # 安装
 
-9Router 的详细安装指南,附故障排除技巧。
+NadeAI 的详细安装指南,附故障排除技巧。
 
 ---
 
@@ -37,7 +37,7 @@ npm --version
 npm install -g 9router
 ```
 
-**启动 9Router:**
+**启动 NadeAI:**
 
 ```bash
 9router
@@ -53,12 +53,12 @@ npm install -g 9router
 在特定项目中安装:
 
 ```bash
-mkdir my-9router
-cd my-9router
+mkdir my-nadeai
+cd my-nadeai
 npm install 9router
 ```
 
-**启动 9Router:**
+**启动 NadeAI:**
 
 ```bash
 npx 9router
@@ -345,7 +345,7 @@ ping google.com
 
 ### 内存占用过高
 
-**问题:** 9Router 占用过多 RAM
+**问题:** NadeAI 占用过多 RAM
 
 **方案:重启服务器**
 

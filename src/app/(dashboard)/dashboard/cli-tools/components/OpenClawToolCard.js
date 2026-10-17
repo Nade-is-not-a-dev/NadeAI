@@ -135,7 +135,7 @@ export default function OpenClawToolCard({
     try {
       const keyToUse = selectedApiKey?.trim()
         || (apiKeys?.length > 0 ? apiKeys[0].key : null)
-        || (!cloudEnabled ? "sk_9router" : null);
+        || (!cloudEnabled ? "sk_nadeai" : null);
 
       const res = await fetch("/api/cli-tools/openclaw-settings", {
         method: "POST",
@@ -197,7 +197,7 @@ export default function OpenClawToolCard({
   const getManualConfigs = () => {
     const keyToUse = (selectedApiKey && selectedApiKey.trim())
       ? selectedApiKey
-      : (!cloudEnabled ? "sk_9router" : "<API_KEY_FROM_DASHBOARD>");
+      : (!cloudEnabled ? "sk_nadeai" : "<API_KEY_FROM_DASHBOARD>");
 
     const settingsContent = {
       agents: {

@@ -44,7 +44,7 @@ export default function DroidToolCard({
 
   const getConfigStatus = () => {
     if (!droidStatus?.installed) return null;
-    // Check for any 9Router model entry (support multi-model: custom:9Router-0, custom:9Router-1, ...)
+    // Check for any NadeAI model entry (support multi-model: custom:9Router-0, custom:9Router-1, ...)
     const currentConfig = droidStatus.settings?.customModels?.find(m => m.id?.startsWith("custom:9Router"));
     if (!currentConfig) return "not_configured";
     return matchKnownEndpoint(currentConfig.baseUrl, { tunnelPublicUrl, tailscaleUrl, cloudUrl: cloudEnabled ? CLOUD_URL : null }) ? "configured" : "other";
@@ -143,7 +143,7 @@ export default function DroidToolCard({
     try {
       const keyToUse = selectedApiKey?.trim()
         || (apiKeys?.length > 0 ? apiKeys[0].key : null)
-        || (!cloudEnabled ? "sk_9router" : null);
+        || (!cloudEnabled ? "sk_nadeai" : null);
 
       const res = await fetch("/api/cli-tools/droid-settings", {
         method: "POST",
@@ -194,7 +194,7 @@ export default function DroidToolCard({
   const getManualConfigs = () => {
     const keyToUse = (selectedApiKey && selectedApiKey.trim())
       ? selectedApiKey
-      : (!cloudEnabled ? "sk_9router" : "<API_KEY_FROM_DASHBOARD>");
+      : (!cloudEnabled ? "sk_nadeai" : "<API_KEY_FROM_DASHBOARD>");
 
     const settingsContent = {
       customModels: modelList.map((m, i) => ({

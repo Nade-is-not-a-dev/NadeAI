@@ -1,12 +1,12 @@
 # Câu hỏi thường gặp
 
-Những câu hỏi phổ biến về 9Router.
+Những câu hỏi phổ biến về NadeAI.
 
 ---
 
-## 9Router là gì?
+## NadeAI là gì?
 
-**9Router là bộ định tuyến mô hình AI giúp tối đa hóa giá trị subscription và giảm chi phí.**
+**NadeAI là bộ định tuyến mô hình AI giúp tối đa hóa giá trị subscription và giảm chi phí.**
 
 Nó định tuyến request thông minh qua nhiều provider AI bằng hệ thống fallback 3 tầng:
 1. **Tầng Subscription** - Tối đa quota Claude Code, Codex, Gemini bạn đang trả tiền
@@ -23,7 +23,7 @@ Nó định tuyến request thông minh qua nhiều provider AI bằng hệ th�
 
 ## Pricing hoạt động thế nào?
 
-**9Router dùng chiến lược pricing 3 tầng:**
+**NadeAI dùng chiến lược pricing 3 tầng:**
 
 ### Tier 1: Subscription (Dùng đầu tiên)
 - **Claude Code** (Pro/Max): $20-100/tháng - Quota 5 giờ + hàng tuần
@@ -50,9 +50,9 @@ Nó định tuyến request thông minh qua nhiều provider AI bằng hệ th�
 
 ---
 
-## 9Router có miễn phí không?
+## NadeAI có miễn phí không?
 
-**Có, 9Router hoàn toàn miễn phí và mã nguồn mở 100%.**
+**Có, NadeAI hoàn toàn miễn phí và mã nguồn mở 100%.**
 
 **Provider free tier có sẵn:**
 - **Gemini CLI** - 180K completions/tháng (MIỄN PHÍ tài khoản Google)
@@ -96,7 +96,7 @@ Xem [tài liệu providers](providers/subscription.md) để biết chi tiết.
 
 ## Tôi có thể dùng nhiều provider không?
 
-**Có! Đây là tính năng cốt lõi của 9Router.**
+**Có! Đây là tính năng cốt lõi của NadeAI.**
 
 **Combo cho phép bạn nối nhiều provider với fallback tự động:**
 
@@ -129,7 +129,7 @@ Xem [tài liệu combos](features/combos.md) để biết ví dụ.
 
 ## Quota tracking hoạt động thế nào?
 
-**9Router theo dõi quota thời gian thực cho tất cả provider:**
+**NadeAI theo dõi quota thời gian thực cho tất cả provider:**
 
 **Tính năng:**
 - **Token consumption** - Tokens input/output mỗi request
@@ -154,13 +154,13 @@ Xem [tài liệu quota tracking](features/quota-tracking.md) để biết chi ti
 
 ---
 
-## 9Router có hoạt động với Cursor không?
+## NadeAI có hoạt động với Cursor không?
 
 **Có, nhưng Cursor yêu cầu endpoint cloud.**
 
 **Vấn đề:** Cursor IDE không hỗ trợ endpoint localhost.
 
-**Giải pháp:** Dùng 9Router cloud deployment:
+**Giải pháp:** Dùng NadeAI cloud deployment:
 
 ```
 Cursor Settings → Models → Advanced:
@@ -192,9 +192,9 @@ Xem [hướng dẫn tích hợp Cursor](integration/cursor.md) để biết chi 
 
 ---
 
-## Tôi có thể self-host 9Router không?
+## Tôi có thể self-host NadeAI không?
 
-**Có! 9Router hỗ trợ nhiều tùy chọn deployment:**
+**Có! NadeAI hỗ trợ nhiều tùy chọn deployment:**
 
 ### Localhost (Mặc định)
 ```bash
@@ -245,11 +245,11 @@ Xem [hướng dẫn deployment](getting-started/installation.md#deployment) đ�
 
 ## Dữ liệu của tôi có an toàn không?
 
-**Có, 9Router ưu tiên bảo mật và quyền riêng tư:**
+**Có, NadeAI ưu tiên bảo mật và quyền riêng tư:**
 
 **Local storage:**
 - Mọi dữ liệu lưu cục bộ tại `~/.9router` (hoặc `DATA_DIR` tùy chỉnh)
-- Không gửi data đến server 9Router
+- Không gửi data đến server NadeAI
 - OAuth tokens mã hóa bằng JWT
 
 **Không telemetry:**
@@ -268,20 +268,20 @@ Xem [hướng dẫn deployment](getting-started/installation.md#deployment) đ�
 - Bật HTTPS cho cloud deployment
 - Xoay API key định kỳ
 
-**9Router lưu gì:**
+**NadeAI lưu gì:**
 - Tokens OAuth của provider (mã hóa)
 - API keys (mã hóa)
 - Thống kê sử dụng (chỉ cục bộ)
 - Cấu hình combo
 
-**9Router KHÔNG lưu:**
+**NadeAI KHÔNG lưu:**
 - Prompts hoặc responses của bạn
 - Code bạn tạo
 - Thông tin cá nhân
 
 ---
 
-## Làm thế nào để cập nhật 9Router?
+## Làm thế nào để cập nhật NadeAI?
 
 **Phương thức cập nhật phụ thuộc loại cài đặt:**
 

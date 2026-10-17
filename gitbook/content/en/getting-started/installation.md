@@ -1,6 +1,6 @@
 # Installation
 
-Detailed installation guide for 9Router with troubleshooting tips.
+Detailed installation guide for NadeAI with troubleshooting tips.
 
 ---
 
@@ -31,13 +31,13 @@ npm --version
 
 ### Method 1: Global Installation (Recommended)
 
-Install 9Router globally to use from anywhere:
+Install NadeAI globally to use from anywhere:
 
 ```bash
 npm install -g 9router
 ```
 
-**Start 9Router:**
+**Start NadeAI:**
 
 ```bash
 9router
@@ -53,12 +53,12 @@ npm install -g 9router
 Install in a specific project:
 
 ```bash
-mkdir my-9router
-cd my-9router
+mkdir my-nadeai
+cd my-nadeai
 npm install 9router
 ```
 
-**Start 9Router:**
+**Start NadeAI:**
 
 ```bash
 npx 9router
@@ -345,7 +345,7 @@ Dashboard → Provider → Disconnect → Reconnect
 
 ### High Memory Usage
 
-**Issue:** 9Router using too much RAM
+**Issue:** NadeAI using too much RAM
 
 **Solution: Restart server**
 

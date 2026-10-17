@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="../images/9router.png?1" alt="Tableau de bord 9Router" width="800"/>
+  <img src="../images/9router.png?1" alt="Tableau de bord NadeAI" width="800"/>
   
-  # 9Router - Routeur IA GRATUIT et économiseur de tokens
+  # NadeAI - Routeur IA GRATUIT et économiseur de tokens
   
   **N'arrêtez jamais de coder. Économisez 20 à 40 % de tokens avec RTK + bascule automatique vers des modèles d'IA GRATUITS et bon marché.**
   
@@ -23,7 +23,7 @@
 
 ---
 
-## 🤔 Pourquoi 9Router ?
+## 🤔 Pourquoi NadeAI ?
 
 **Arrêtez de gaspiller de l'argent, des tokens et de buter contre les limites :**
 
@@ -33,7 +33,7 @@
 - ❌ Des API coûteuses (20 à 50 $/mois par fournisseur)
 - ❌ Changement manuel entre les fournisseurs
 
-**9Router résout tout cela :**
+**NadeAI résout tout cela :**
 
 - ✅ **Économiseur de tokens RTK** - Compresse automatiquement le contenu de tool_result et économise 20 à 40 % de tokens par requête
 - ✅ **Maximise les abonnements** - Suit le quota et utilise chaque bit avant sa réinitialisation
@@ -53,7 +53,7 @@
        │ http://localhost:20128/v1
        ↓
 ┌─────────────────────────────────────────────┐
-│           9Router (Smart Router)            │
+│           NadeAI (Smart Router)            │
 │  • RTK Token Saver (cut tool_result tokens) │
 │  • Format translation (OpenAI ↔ Claude)     │
 │  • Quota tracking                           │
@@ -99,7 +99,7 @@ Paramètres de Claude Code/Codex/OpenClaw/Cursor/Cline :
 
 **Alternative : exécuter depuis le code source (ce dépôt) :**
 
-Le paquet de ce dépôt est privé (`9router-app`), donc l'exécution depuis le code source/Docker est le chemin de développement local attendu.
+Le paquet de ce dépôt est privé (`nadeai-app`), donc l'exécution depuis le code source/Docker est le chemin de développement local attendu.
 
 ```bash
 cp .env.example .env
@@ -129,34 +129,34 @@ URL par défaut :
   <tr>
   <td align="center" width="320">
   <a href="https://www.youtube.com/watch?v=X69n5Lm06Yw">
-    <img src="https://img.youtube.com/vi/X69n5Lm06Yw/maxresdefault.jpg" alt="Tiết kiệm chi phí LLM với 9Router" width="300"/>
+    <img src="https://img.youtube.com/vi/X69n5Lm06Yw/maxresdefault.jpg" alt="Tiết kiệm chi phí LLM với NadeAI" width="300"/>
   </a><br/>
   <b>🇻🇳 Tiếng Việt</b><br/>
-  <sub>Tiết kiệm chi phí LLM cho OpenClaw với 9Router<br/>by <a href="https://www.youtube.com/c/M%C3%ACAIblog">Mì AI</a></sub>
+  <sub>Tiết kiệm chi phí LLM cho OpenClaw với NadeAI<br/>by <a href="https://www.youtube.com/c/M%C3%ACAIblog">Mì AI</a></sub>
 </td>
 <td align="center" width="320">
       <a href="https://youtu.be/VQAw612S27Y">
-        <img src="https://img.youtube.com/vi/VQAw612S27Y/maxresdefault.jpg" alt="9Router + Claude Code FREE Unlimited Setup" width="300"/>
+        <img src="https://img.youtube.com/vi/VQAw612S27Y/maxresdefault.jpg" alt="NadeAI + Claude Code FREE Unlimited Setup" width="300"/>
       </a><br/>
       <b>🇵🇰 اردو / हिन्दी</b><br/>
-      <sub>9Router + Claude Code FREE Unlimited Setup<br/>by <a href="https://www.youtube.com/@BuildAIWithHamid">Build AI With Hamid</a></sub>
+      <sub>NadeAI + Claude Code FREE Unlimited Setup<br/>by <a href="https://www.youtube.com/@BuildAIWithHamid">Build AI With Hamid</a></sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.youtube.com/watch?v=raEyZPg5xE0">
-        <img src="https://img.youtube.com/vi/raEyZPg5xE0/maxresdefault.jpg" alt="9Router Setup Tutorial" width="300"/>
+        <img src="https://img.youtube.com/vi/raEyZPg5xE0/maxresdefault.jpg" alt="NadeAI Setup Tutorial" width="300"/>
       </a><br/>
       <b>🇺🇸 English</b><br/>
-      <sub>9Router + Claude Code FREE Setup<br/>by <a href="https://www.youtube.com/@BuildAIWithHamid">Build AI With Hamid</a></sub>
+      <sub>NadeAI + Claude Code FREE Setup<br/>by <a href="https://www.youtube.com/@BuildAIWithHamid">Build AI With Hamid</a></sub>
     </td>
     
   </tr>
   <tr>
   <td align="center" width="320">
       <a href="https://youtu.be/3dF5GIYMrcQ?si=bAyfyiHbARJQAHj_">
-        <img src="https://img.youtube.com/vi/3dF5GIYMrcQ/hqdefault.jpg" alt="9Router Setup Tutorial" width="300"/>
+        <img src="https://img.youtube.com/vi/3dF5GIYMrcQ/hqdefault.jpg" alt="NadeAI Setup Tutorial" width="300"/>
       </a><br/>
       <b>🇺🇸 English</b><br/>
-      <sub>9Router + Claude Code FREE Setup<br/>by <a href="https://www.youtube.com/@BuildAIWithHamid">Build AI With Hamid</a></sub>
+      <sub>NadeAI + Claude Code FREE Setup<br/>by <a href="https://www.youtube.com/@BuildAIWithHamid">Build AI With Hamid</a></sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.youtube.com/watch?v=o3qYCyjrFYg">
@@ -170,7 +170,7 @@ URL par défaut :
         <img src="https://img.youtube.com/vi/Ttpc26m39Dw/maxresdefault.jpg" alt="Claude CLI Free Setup" width="300"/>
       </a><br/>
       <b>🇺🇸 English</b><br/>
-      <sub>Claude CLI Free Setup with 9Router 🚀<br/>by <a href="https://www.youtube.com/@CodeVerseSoban">CodeVerse Soban</a></sub>
+      <sub>Claude CLI Free Setup with NadeAI 🚀<br/>by <a href="https://www.youtube.com/@CodeVerseSoban">CodeVerse Soban</a></sub>
     </td>
     
   </tr>
@@ -180,7 +180,7 @@ URL par défaut :
         <img src="https://img.youtube.com/vi/G-5A_D5Pm6Y/maxresdefault.jpg" alt="Cài đặt OpenClaw Free A-Z" width="300"/>
       </a><br/>
       <b>🇻🇳 Tiếng Việt</b><br/>
-      <sub>Cài Đặt OpenClaw Free Từ A-Z + 9Router<br/>by <a href="https://www.youtube.com/@maigia">Mai Gia</a></sub>
+      <sub>Cài Đặt OpenClaw Free Từ A-Z + NadeAI<br/>by <a href="https://www.youtube.com/@maigia">Mai Gia</a></sub>
     </td>
     <td align="center" width="320">
       <a href="https://www.youtube.com/watch?v=JXmg8_gccgE">
@@ -194,7 +194,7 @@ URL par défaut :
         <img src="https://img.youtube.com/vi/CkVZZUSTXAI/mqdefault.jpg" alt="Claude CLI Free Setup" width="300"/>
       </a><br/>
       <b>🇮🇩 Indonesia</b><br/>
-      <sub>Koding 24 Jam Anti Rate Limit! Hemat Token AI 65% | Tutorial Quick Setup 9Router 🚀<br/>by <a href="https://www.youtube.com/@krisswuh">Krisswuh</a></sub>
+      <sub>Koding 24 Jam Anti Rate Limit! Hemat Token AI 65% | Tutorial Quick Setup NadeAI 🚀<br/>by <a href="https://www.youtube.com/@krisswuh">Krisswuh</a></sub>
     </td>
     
   </tr>
@@ -202,10 +202,10 @@ URL par défaut :
   <tr>
   <td align="center" width="320">
       <a href="https://www.youtube.com/watch?v=TXGv4eofe1I">
-        <img src="https://img.youtube.com/vi/TXGv4eofe1I/mqdefault.jpg" alt="Cara Deploy 9Router di Hugging Face GRATIS Non-Stop! | Alternatif VPS RAM 16GB" width="300"/>
+        <img src="https://img.youtube.com/vi/TXGv4eofe1I/mqdefault.jpg" alt="Cara Deploy NadeAI di Hugging Face GRATIS Non-Stop! | Alternatif VPS RAM 16GB" width="300"/>
       </a><br/>
       <b>🇮🇩 Indonesia</b><br/>
-      <sub>Cara Deploy 9Router di Hugging Face GRATIS Non-Stop! | Alternatif VPS RAM 16GB<br/>by <a href="https://www.youtube.com/@krisswuh">Krisswuh</a></sub>
+      <sub>Cara Deploy NadeAI di Hugging Face GRATIS Non-Stop! | Alternatif VPS RAM 16GB<br/>by <a href="https://www.youtube.com/@krisswuh">Krisswuh</a></sub>
     </td>
   </tr>
 
@@ -213,13 +213,13 @@ URL par défaut :
 
 </div>
 
-> 🎬 **Vous avez réalisé une vidéo sur 9Router ?** Envoyez une [Pull Request](https://github.com/decolua/9router/pulls) en ajoutant votre vidéo à cette section — nous la fusionnerons !
+> 🎬 **Vous avez réalisé une vidéo sur NadeAI ?** Envoyez une [Pull Request](https://github.com/decolua/9router/pulls) en ajoutant votre vidéo à cette section — nous la fusionnerons !
 
 ---
 
 ## 🛠️ Outils CLI pris en charge
 
-9Router fonctionne parfaitement avec tous les principaux outils de codage IA :
+NadeAI fonctionne parfaitement avec tous les principaux outils de codage IA :
 
 <div align="center">
   <table>
@@ -468,10 +468,10 @@ Avec RTK :   28K tokens envoyés au LLM   (40 % économisés · même contexte �
 
 ### 🧠 Économiseur de tokens Headroom
 
-Headroom est optionnel et s'exécute séparément. 9Router appelle l'endpoint local `/v1/compress` de Headroom, puis conserve le routage, le repli, l'authentification et le suivi d'utilisation normaux :
+Headroom est optionnel et s'exécute séparément. NadeAI appelle l'endpoint local `/v1/compress` de Headroom, puis conserve le routage, le repli, l'authentification et le suivi d'utilisation normaux :
 
 ```
-Client → 9Router → Headroom /v1/compress → 9Router → fournisseur
+Client → NadeAI → Headroom /v1/compress → NadeAI → fournisseur
 ```
 
 Configuration locale :
@@ -493,7 +493,7 @@ http://headroom:8787
 http://host.docker.internal:8787
 ```
 
-Si Headroom est indisponible ou renvoie une erreur, 9Router bascule en mode dégradé et envoie la requête originale.
+Si Headroom est indisponible ou renvoie une erreur, NadeAI bascule en mode dégradé et envoie la requête originale.
 
 ### 🐴 Ponytail (Dev sénior fainéant)
 
@@ -535,7 +535,7 @@ Combo : "my-coding-stack"
 Traduction transparente entre les formats :
 
 - **OpenAI** ↔ **Claude** ↔ **Gemini** ↔ **Cursor** ↔ **Kiro** ↔ **Vertex** ↔ **Antigravity** ↔ **Ollama** ↔ **OpenAI Responses**
-- Votre outil CLI envoie le format OpenAI → 9Router le traduit → Le fournisseur reçoit le format natif
+- Votre outil CLI envoie le format OpenAI → NadeAI le traduit → Le fournisseur reçoit le format natif
 - Fonctionne avec tout outil prenant en charge les endpoints OpenAI personnalisés
 
 ### 👥 Prise en charge multi-comptes
@@ -589,13 +589,13 @@ Traduction transparente entre les formats :
 > **💡 IMPORTANT - Comprendre les coûts du tableau de bord :**
 >
 > Le "coût" affiché dans l'Analytique d'utilisation est **uniquement à des fins de suivi et de comparaison**.
-> 9Router lui-même **ne vous facture jamais** quoi que ce soit. Vous ne payez que les fournisseurs directement (si vous utilisez des services payants).
+> NadeAI lui-même **ne vous facture jamais** quoi que ce soit. Vous ne payez que les fournisseurs directement (si vous utilisez des services payants).
 >
 > **Exemple :** Si votre tableau de bord affiche "coût total de 290 $" alors que vous utilisez les modèles iFlow, cela représente
 > ce que vous auriez payé en utilisant des API payantes directement. Votre coût réel = **0 $** (iFlow est gratuit et illimité).
 >
 > Considérez-le comme un "suivi d'économies" qui montre combien vous économisez en utilisant des modèles gratuits ou
-> en routant via 9Router !
+> en routant via NadeAI !
 
 ### 🌐 Déployez partout
 
@@ -628,15 +628,15 @@ Traduction transparente entre les formats :
 
 ---
 
-### 📊 Comprendre les coûts et la facturation de 9Router
+### 📊 Comprendre les coûts et la facturation de NadeAI
 
-**La réalité de la facturation de 9Router :**
+**La réalité de la facturation de NadeAI :**
 
-✅ **Le logiciel 9Router = GRATUIT pour toujours** (open source, ne facture jamais)  
+✅ **Le logiciel NadeAI = GRATUIT pour toujours** (open source, ne facture jamais)  
 ✅ **Les "coûts" du tableau de bord = Affichage/suivi uniquement** (pas de vraies factures)  
 ✅ **Vous payez les fournisseurs directement** (abonnements ou frais d'API)  
 ✅ **Les fournisseurs GRATUITS restent GRATUITS** (iFlow, Kiro, Qwen = 0 $ illimité)  
-❌ **9Router n'envoie jamais de factures** et ne débite pas votre carte
+❌ **NadeAI n'envoie jamais de factures** et ne débite pas votre carte
 
 **Comment fonctionne l'affichage des coûts :**
 
@@ -659,9 +659,9 @@ Vérification de la réalité :
 **Règles de paiement :**
 
 - **Fournisseurs par abonnement** (Claude Code, Codex) : Payez-les directement via leurs sites web
-- **Fournisseurs bon marché** (GLM, MiniMax) : Payez-les directement, 9Router se contente de router
+- **Fournisseurs bon marché** (GLM, MiniMax) : Payez-les directement, NadeAI se contente de router
 - **Fournisseurs GRATUITS** (iFlow, Kiro, Qwen) : Vraiment gratuits pour toujours, sans frais cachés
-- **9Router** : Ne facture jamais rien, jamais
+- **NadeAI** : Ne facture jamais rien, jamais
 
 ---
 
@@ -740,7 +740,7 @@ Accès via : WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 <details>
 <summary><b>📊 Pourquoi mon tableau de bord affiche-t-il des coûts élevés ?</b></summary>
 
-Le tableau de bord suit votre utilisation de tokens et affiche des **coûts estimés** comme si vous utilisiez des API payantes directement. Ce n'est **pas une facturation réelle** — c'est une référence pour montrer combien vous économisez en utilisant des modèles gratuits ou des abonnements existants via 9Router.
+Le tableau de bord suit votre utilisation de tokens et affiche des **coûts estimés** comme si vous utilisiez des API payantes directement. Ce n'est **pas une facturation réelle** — c'est une référence pour montrer combien vous économisez en utilisant des modèles gratuits ou des abonnements existants via NadeAI.
 
 **Exemple :**
 
@@ -754,17 +754,17 @@ L'affichage des coûts est un "suivi d'économies" qui vous aide à comprendre v
 </details>
 
 <details>
-<summary><b>💳 9Router me facturera-t-il ?</b></summary>
+<summary><b>💳 NadeAI me facturera-t-il ?</b></summary>
 
-**Non.** 9Router est un logiciel gratuit et open source qui s'exécute sur votre propre ordinateur. Il ne vous facture jamais rien.
+**Non.** NadeAI est un logiciel gratuit et open source qui s'exécute sur votre propre ordinateur. Il ne vous facture jamais rien.
 
 **Vous ne payez que :**
 
 - ✅ **Fournisseurs par abonnement** (Claude Code 20 $/mois, Codex 20 à 200 $/mois) → Payez-les directement sur leurs sites web
-- ✅ **Fournisseurs bon marché** (GLM, MiniMax) → Payez-les directement, 9Router route simplement vos requêtes
-- ❌ **9Router lui-même** → **Ne facture jamais rien, jamais**
+- ✅ **Fournisseurs bon marché** (GLM, MiniMax) → Payez-les directement, NadeAI route simplement vos requêtes
+- ❌ **NadeAI lui-même** → **Ne facture jamais rien, jamais**
 
-9Router est un proxy/routeur local. Il n'a pas votre carte bancaire, ne peut pas envoyer de factures et ne possède aucun système de facturation. C'est un logiciel entièrement gratuit.
+NadeAI est un proxy/routeur local. Il n'a pas votre carte bancaire, ne peut pas envoyer de factures et ne possède aucun système de facturation. C'est un logiciel entièrement gratuit.
 
 </details>
 
@@ -779,7 +779,7 @@ Ce sont des services gratuits offerts par ces entreprises respectives :
 - **OpenCode Free** : Proxy de passage sans authentification, modèles récupérés automatiquement depuis `opencode.ai/zen/v1/models`
 - **Vertex AI** : 300 $ de crédit gratuit pour les nouveaux comptes Google Cloud (90 jours)
 
-9Router se contente de router vos requêtes vers eux — il n'y a pas de "piège" ni de facturation future. Ce sont de véritables services gratuits, et 9Router les rend faciles à utiliser avec le support du repli.
+NadeAI se contente de router vos requêtes vers eux — il n'y a pas de "piège" ni de facturation future. Ce sont de véritables services gratuits, et NadeAI les rend faciles à utiliser avec le support du repli.
 
 **Niveaux gratuits interrompus (non recommandés) :**
 
@@ -814,7 +814,7 @@ Ce sont des services gratuits offerts par ces entreprises respectives :
 
 3. **Utilisez les fournisseurs par abonnement en dernier :**
    - Uniquement si vous les possédez déjà
-   - 9Router vous aide à maximiser leur valeur grâce au suivi de quota
+   - NadeAI vous aide à maximiser leur valeur grâce au suivi de quota
 
 **Résultat :** La plupart des utilisateurs peuvent fonctionner à 0 $/mois en utilisant uniquement les niveaux gratuits !
 
@@ -823,22 +823,22 @@ Ce sont des services gratuits offerts par ces entreprises respectives :
 <details>
 <summary><b>📈 Et si mon utilisation explose soudainement ?</b></summary>
 
-Le repli intelligent de 9Router évite les frais surprises :
+Le repli intelligent de NadeAI évite les frais surprises :
 
 **Scénario :** Vous êtes en sprint de codage et vous épuisez vos quotas
 
-**Sans 9Router :**
+**Sans NadeAI :**
 
 - ❌ Limite de débit atteinte → Le travail s'arrête → Frustration
 - ❌ Ou : Vous accumulez accidentellement d'énormes factures d'API
 
-**Avec 9Router :**
+**Avec NadeAI :**
 
 - ✅ L'abonnement atteint sa limite → Repli automatique vers le niveau économique
 - ✅ Le niveau économique devient coûteux → Repli automatique vers le niveau gratuit
 - ✅ N'arrêtez jamais de coder → Coûts prévisibles
 
-**Vous gardez le contrôle :** Définissez des limites de dépenses par fournisseur dans le tableau de bord, et 9Router les respecte.
+**Vous gardez le contrôle :** Définissez des limites de dépenses par fournisseur dans le tableau de bord, et NadeAI les respecte.
 
 </details>
 
@@ -863,7 +863,7 @@ Modèles :
   cc/claude-haiku-4-5-20251001
 ```
 
-**Astuce pro :** Utilisez Opus pour les tâches complexes et Sonnet pour la vitesse. 9Router suit le quota par modèle !
+**Astuce pro :** Utilisez Opus pour les tâches complexes et Sonnet pour la vitesse. NadeAI suit le quota par modèle !
 
 ### OpenAI Codex (Plus/Pro)
 
@@ -1093,7 +1093,7 @@ Tableau de bord → CLI Tools → OpenClaw → Sélectionnez le modèle → Appl
     "providers": {
       "9router": {
         "baseUrl": "http://127.0.0.1:20128/v1",
-        "apiKey": "sk_9router",
+        "apiKey": "sk_nadeai",
         "api": "openai-completions",
         "models": [
           {
@@ -1107,7 +1107,7 @@ Tableau de bord → CLI Tools → OpenClaw → Sélectionnez le modèle → Appl
 }
 ```
 
-> **Remarque :** OpenClaw ne fonctionne qu'avec un 9Router local. Utilisez `127.0.0.1` au lieu de `localhost` pour éviter les problèmes de résolution IPv6.
+> **Remarque :** OpenClaw ne fonctionne qu'avec un NadeAI local. Utilisez `127.0.0.1` au lieu de `localhost` pour éviter les problèmes de résolution IPv6.
 
 ### Cline / Continue / RooCode
 
@@ -1331,7 +1331,7 @@ Remarques :
 
 **Token OAuth expiré**
 
-- Renouvelé automatiquement par 9Router
+- Renouvelé automatiquement par NadeAI
 - Si les problèmes persistent : Tableau de bord → Provider → Reconnecter
 
 **Coûts élevés**
@@ -1404,7 +1404,7 @@ Authorization: Bearer votre-clé-api
 
 ## 👥 Contributeurs
 
-Merci à tous les contributeurs qui ont contribué à améliorer 9Router !
+Merci à tous les contributeurs qui ont contribué à améliorer NadeAI !
 
 [![Contributors](https://contrib.rocks/image?repo=decolua/9router&max=150&columns=15&anon=1&v=20260309)](https://github.com/decolua/9router/graphs/contributors)
 
@@ -1416,7 +1416,7 @@ Merci à tous les contributeurs qui ont contribué à améliorer 9Router !
 
 ## 🔀 Forks
 
-**[OmniRoute](https://github.com/diegosouzapw/OmniRoute)** — Un fork TypeScript complet de 9Router. Ajoute plus de 36 fournisseurs, un repli automatique à 4 niveaux, des API multimodales (images, embeddings, audio, TTS), un disjoncteur, un cache sémantique, des évaluations de LLM et un tableau de bord soigné. Plus de 368 tests unitaires. Disponible via npm et Docker.
+**[OmniRoute](https://github.com/diegosouzapw/OmniRoute)** — Un fork TypeScript complet de NadeAI. Ajoute plus de 36 fournisseurs, un repli automatique à 4 niveaux, des API multimodales (images, embeddings, audio, TTS), un disjoncteur, un cache sémantique, des évaluations de LLM et un tableau de bord soigné. Plus de 368 tests unitaires. Disponible via npm et Docker.
 
 ---
 
@@ -1425,11 +1425,11 @@ Merci à tous les contributeurs qui ont contribué à améliorer 9Router !
 Construit sur les épaules de géants :
 
 - **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — implémentation originale en Go qui a inspiré ce port JavaScript.
-- **[RTK](https://github.com/rtk-ai/rtk)** ![Stars](https://img.shields.io/github/stars/rtk-ai/rtk?style=flat&color=yellow) — économiseur de tokens en Rust. 9Router porte son pipeline de compression en JS → **−20 à 40 % de tokens d'entrée** sur chaque requête.
-- **[Caveman](https://github.com/JuliusBrussee/caveman)** ![Stars](https://img.shields.io/github/stars/JuliusBrussee/caveman?style=flat&color=yellow) par **[@JuliusBrussee](https://github.com/JuliusBrussee)** — viral _"why use many token when few token do trick"_. 9Router adapte son prompt → **−65 % de tokens de sortie**.
-- **[Ponytail](https://github.com/DietrichGebert/ponytail)** ![Stars](https://img.shields.io/github/stars/DietrichGebert/ponytail?style=flat&color=yellow) par **[@DietrichGebert](https://github.com/DietrichGebert)** — compétence de _"dev sénior fainéant"_. 9Router injecte sa hiérarchie YAGNI-d'abord → **moins de tokens, moins de code, des diffs plus courts**.
+- **[RTK](https://github.com/rtk-ai/rtk)** ![Stars](https://img.shields.io/github/stars/rtk-ai/rtk?style=flat&color=yellow) — économiseur de tokens en Rust. NadeAI porte son pipeline de compression en JS → **−20 à 40 % de tokens d'entrée** sur chaque requête.
+- **[Caveman](https://github.com/JuliusBrussee/caveman)** ![Stars](https://img.shields.io/github/stars/JuliusBrussee/caveman?style=flat&color=yellow) par **[@JuliusBrussee](https://github.com/JuliusBrussee)** — viral _"why use many token when few token do trick"_. NadeAI adapte son prompt → **−65 % de tokens de sortie**.
+- **[Ponytail](https://github.com/DietrichGebert/ponytail)** ![Stars](https://img.shields.io/github/stars/DietrichGebert/ponytail?style=flat&color=yellow) par **[@DietrichGebert](https://github.com/DietrichGebert)** — compétence de _"dev sénior fainéant"_. NadeAI injecte sa hiérarchie YAGNI-d'abord → **moins de tokens, moins de code, des diffs plus courts**.
 
-Un immense merci à ces auteurs — sans leur travail, les fonctionnalités d'économie de tokens de 9Router n'existeraient pas. Mettez-leur une ⭐ sur GitHub !
+Un immense merci à ces auteurs — sans leur travail, les fonctionnalités d'économie de tokens de NadeAI n'existeraient pas. Mettez-leur une ⭐ sur GitHub !
 
 ---
 

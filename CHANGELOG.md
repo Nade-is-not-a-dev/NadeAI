@@ -85,7 +85,7 @@
 - **GLM**: add Z.ai OAuth login to GLM Coding (dual-auth)
 - **Codex**: add GPT-6.1 Sol; expose 1M context variants for GPT-6 and GPT-5.6; add gpt-daybreak/reserve models and route bare `gpt-5.x`/`gpt-6.x` slugs to codex
 - **Claude**: add Claude Sonnet 5.5 (plus `claude-opus-5.5` models in the Kiro registry)
-- **CLI**: add `connect` command for remote 9Router servers
+- **CLI**: add `connect` command for remote NadeAI servers
 - **Providers**: per-provider custom header overrides from the registry
 - **Agnes**: seed the 2.5/3.0 model ids in the registry
 - **Usage**: sync `?provider=` URL param with provider filter for bookmarkable deep links (#4395)
@@ -105,7 +105,7 @@
 - **Proxy**: auto-fallback to insecure TLS on self-signed cert errors; hold strictProxy when no proxy resolves
 - **Translator**: strip `errorMessage` and other non-standard schema keywords from Gemini tool schemas; dedupe same-name tools for DeepSeek models (#3333)
 - **Codebuddy**: parse the 6004 rate limit error and extract `resetsAtMs`; forward `recurring` for codebuddy-intl quota packs (#4422)
-- **CLI Tools**: replace `sk_9router` placeholder with first active dashboard API key
+- **CLI Tools**: replace `sk_nadeai` placeholder with first active dashboard API key
 - **Dashboard**: exclude hidden providers from usage stats provider list
 - **Capabilities**: add deepseek-v4-1-flash vision alias; add zed to live catalog providers
 
@@ -475,7 +475,7 @@
 ## Features
 - **Providers**: add TokenRouter (300+ models via OpenAI-compatible gateway) with
   exact per-model pricing for 110 models and `reasoning_effort` thinking config
-- **Providers**: add Self-hosted STT / TTS / Embedding — point 9Router at your own
+- **Providers**: add Self-hosted STT / TTS / Embedding — point NadeAI at your own
   OpenAI-compatible speech and embedding servers (whisper.cpp, faster-whisper,
   Kokoro-FastAPI, llama-server, vLLM, Infinity). Unlike the named cloud providers
   these read `baseUrl` per connection, so one provider can front several machines
@@ -859,4 +859,4 @@
 - Dashboard: show provider node name instead of connection name in topology (#1770) + show explicit `kind="llm"` combos on combos page (#1684)
 
 ## Docs
-- README: add Indonesian 9Router tutorial video (#1709)
+- README: add Indonesian NadeAI tutorial video (#1709)
