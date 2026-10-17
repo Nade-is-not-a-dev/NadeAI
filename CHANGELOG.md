@@ -12,7 +12,7 @@
 - **Dashboard**: provider icons (and /icons/*) are served with a 7-day browser cache instead of Next's default max-age=0, which re-validated every icon on every load as a conditional GET; requests outside the allowlist still fall through to Next unchanged
 
 ## Fixes
-- **Usage Examples**: the Windows cURL snippet now targets Command Prompt (cmd.exe) — `^` continuations, `REM` header, MSVC-quoted JSON (`\"` escapes) and a `chat.cmd` download. The previous PowerShell-style single-quoted JSON broke when pasted into cmd (single quotes are literal there, so the body reached the server mangled and it answered "Invalid JSON body")
+- **Usage Examples**: Windows now offers two tabs — "Windows (cmd)" (curl.exe, `^` continuations, MSVC-quoted JSON, downloads as `chat.cmd`) and "Windows (PowerShell)" (Invoke-RestMethod with a single-quoted body — immune to PowerShell's native-argument quoting, which mangled inline curl.exe JSON and surfaced as "Invalid JSON body"; downloads as `chat.ps1`)
 - **System Prompt**: scope keys match every spelling the router accepts for a provider (id, runtime alias, registry aliases like `ds` / `cf`), so keys copied from the pickers or from routed model names select their scope
 
 # v0.5.104 (2026-10-15)

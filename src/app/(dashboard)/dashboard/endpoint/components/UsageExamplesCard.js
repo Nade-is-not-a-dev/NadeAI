@@ -191,7 +191,7 @@ export default function UsageExamplesCard({ baseUrl, keys = [] }) {
                   : "text-text-muted hover:text-text-main"
               }`}
             >
-              <OsLogo kind={option.id === "windows" ? "windows" : "unix"} />
+              <OsLogo kind={String(option.id).startsWith("windows") ? "windows" : "unix"} />
               {option.label}
             </button>
           ))}

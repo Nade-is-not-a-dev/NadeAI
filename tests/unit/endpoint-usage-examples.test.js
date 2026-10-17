@@ -14,9 +14,9 @@ const base = {
 };
 
 describe("usage example constants", () => {
-  it("offers curl, node, python, php and go for both OS targets", () => {
+  it("offers curl, node, python, php and go for every OS target", () => {
     expect(USAGE_LANGUAGES.map((l) => l.id)).toEqual(["curl", "node", "python", "php", "go"]);
-    expect(USAGE_OS.map((o) => o.id)).toEqual(["unix", "windows"]);
+    expect(USAGE_OS.map((o) => o.id)).toEqual(["unix", "windows", "windows-ps"]);
   });
 });
 
@@ -52,6 +52,7 @@ describe("buildUsageExample", () => {
     expect(buildUsageExample({ ...base, language: "php" }).filename).toBe("chat.php");
     expect(buildUsageExample({ ...base, language: "go" }).filename).toBe("main.go");
     expect(buildUsageExample({ ...base, language: "curl", os: "windows" }).filename).toBe("chat.cmd");
+    expect(buildUsageExample({ ...base, language: "curl", os: "windows-ps" }).filename).toBe("chat.ps1");
   });
 
   it("falls back to the POSIX curl example for unknown languages", () => {
@@ -69,6 +70,25 @@ describe("buildUsageExample", () => {
     expect(win.code).toContain(" ^\n"); // cmd.exe caret continuations
     expect(win.code).toContain("curl.exe");
     expect(win.code).toContain("REM Windows Command Prompt");
+  });
+
+  it("offers a PowerShell variant that avoids native argument quoting", () => {
+    const message = "It's a \"quoted\" test";
+    const ps = buildUsageExample({ ...base, message, language: "curl", os: "windows-ps" });
+    expect(ps.filename).toBe("chat.ps1");
+    expect(ps.code).toContain("Invoke-RestMethod -Method Post");
+    expect(ps.code).not.toContain("curl.exe");
+    expect(ps.code).toContain(" `\n"); // PowerShell backtick continuations
+    // body is an exact single-quoted literal: apostrophes doubled, nothing expands
+    const body = JSON.stringify({ model: base.model, messages: [{ role: "user", content: message }] });
+    expect(ps.code).toContain(`-Body '${body.replace(/'/g, "''")}'`);
+    expect(ps.code).toContain("$response.choices[0].message.content");
+  });
+
+  it("treats PowerShell as Windows for the python hints", () => {
+    const ps = buildUsageExample({ ...base, language: "python", os: "windows-ps" }).code;
+    expect(ps).toContain("py -m pip install requests");
+    expect(ps).toContain("py chat.py");
   });
 
   it("cmd.exe receives the exact JSON body after caret-join + CRT parsing", () => {

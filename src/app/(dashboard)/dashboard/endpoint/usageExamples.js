@@ -5,9 +5,11 @@
 // and message come from the form (a placeholder is used when a field is
 // empty so the snippet stays syntactically valid).
 //
-// OS adjustments: cURL is genuinely different on Windows (cmd.exe
-// continuations and \" escaping, curl.exe, .cmd download); Python differs in
-// the install/run hint lines; the remaining languages are OS-invariant.
+// OS adjustments: cURL is genuinely different per OS — cmd.exe gets caret
+// continuations and MSVC-quoted JSON; PowerShell gets an Invoke-RestMethod
+// variant side-stepping the native-argument quoting that can mangle inline
+// JSON; Python differs in the install/run hint lines; the remaining languages
+// are OS-invariant.
 
 export const USAGE_LANGUAGES = [
   { id: "curl", label: "cURL" },
@@ -19,7 +21,8 @@ export const USAGE_LANGUAGES = [
 
 export const USAGE_OS = [
   { id: "unix", label: "Linux / macOS" },
-  { id: "windows", label: "Windows" },
+  { id: "windows", label: "Windows (cmd)" },
+  { id: "windows-ps", label: "Windows (PowerShell)" },
 ];
 
 export const USAGE_DEFAULT_MESSAGE = "Hello! Reply in one short sentence.";
@@ -54,6 +57,9 @@ const winQuote = (s) => {
   }
   return out + "\"";
 };
+// PowerShell single-quoted literal: only the quote needs doubling — nothing
+// else expands inside it, so embedded $/@/backtick stay literal.
+const psSingle = (s) => "'" + String(s).replace(/'/g, "''") + "'";
 // PHP single-quoted literal.
 const phpSingle = (s) => "'" + String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'";
 
@@ -83,6 +89,23 @@ function buildCurl({ base, key, model, message, os }) {
     `  -H "Content-Type: application/json" \\`,
     `  -H "Authorization: Bearer ${key}" \\`,
     `  -d ${shSingle(body)}`,
+  ].join("\n");
+}
+
+function buildPowerShell({ base, key, model, message }) {
+  // PowerShell-native: Invoke-RestMethod receives the body as a .NET string, so
+  // none of the native-command-line quoting that can mangle inline JSON
+  // (curl.exe + PowerShell argument passing) applies — this runs as pasted.
+  const body = chatBody({ model, message });
+  return [
+    "# Windows PowerShell - no curl needed (Invoke-RestMethod)",
+    "$response = Invoke-RestMethod -Method Post `",
+    `  -Uri ${psSingle(`${base}/chat/completions`)} \``,
+    "  -ContentType 'application/json' `",
+    `  -Headers @{ Authorization = ${psSingle(`Bearer ${key}`)} } \``,
+    `  -Body ${psSingle(body)}`,
+    "",
+    "$response.choices[0].message.content",
   ].join("\n");
 }
 
@@ -118,7 +141,7 @@ function buildNode({ base, key, model, message }) {
 }
 
 function buildPython({ base, key, model, message, os }) {
-  const windows = os === "windows";
+  const windows = String(os).startsWith("windows");
   const install = windows ? "py -m pip install requests" : "pip install requests";
   const run = windows ? "py chat.py" : "python3 chat.py";
   return [
@@ -290,8 +313,8 @@ export function buildUsageExample({
       break;
     case "curl":
     default:
-      code = buildCurl(ctx);
-      filename = os === "windows" ? "chat.cmd" : "chat.sh";
+      code = os === "windows-ps" ? buildPowerShell(ctx) : buildCurl(ctx);
+      filename = os === "windows" ? "chat.cmd" : os === "windows-ps" ? "chat.ps1" : "chat.sh";
       break;
   }
   return { code: `${code}\n`, filename };
