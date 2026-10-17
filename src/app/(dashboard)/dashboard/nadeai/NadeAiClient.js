@@ -296,6 +296,7 @@ export default function NadeAiClient() {
               value={form.publicProvider}
               onChange={(e) => setForm((f) => ({ ...f, publicProvider: e.target.value }))}
               placeholder="nadeai"
+              data-assistant-id="nadeai-form-public-provider"
               list="nadeai-public-providers"
               hint="Prefix clients see - anything (nadeai, anthropic, ...)."
             />
@@ -304,12 +305,14 @@ export default function NadeAiClient() {
               value={form.publicModel}
               onChange={(e) => setForm((f) => ({ ...f, publicModel: e.target.value }))}
               placeholder="claude-fable-5.1"
+              data-assistant-id="nadeai-form-public-model"
             />
             <Input
               label="Real provider"
               value={form.realProvider}
               onChange={(e) => setForm((f) => ({ ...f, realProvider: e.target.value }))}
               placeholder="oc"
+              data-assistant-id="nadeai-form-real-provider"
               list="nadeai-providers"
               hint="Active provider id or routing alias."
             />
@@ -319,6 +322,7 @@ export default function NadeAiClient() {
                 value={form.realModel}
                 onChange={(e) => setForm((f) => ({ ...f, realModel: e.target.value }))}
                 placeholder="deepseek-v4.1-flash-free"
+                data-assistant-id="nadeai-form-real-model"
                 list={modelListId}
               />
               <button
@@ -349,6 +353,7 @@ export default function NadeAiClient() {
               value={form.systemPrompt}
               onChange={(e) => setForm((f) => ({ ...f, systemPrompt: e.target.value }))}
               placeholder="e.g. You are Claude Fable 5.1 ..."
+              data-assistant-id="nadeai-form-prompt"
               spellCheck={false}
               className={`${TEXTAREA_CLASS} mt-1.5`}
             />
@@ -368,7 +373,7 @@ export default function NadeAiClient() {
             >
               Cancel
             </Button>
-            <Button icon="save" onClick={save} loading={busy}>
+            <Button icon="save" onClick={save} loading={busy} data-assistant-id="nadeai-form-save">
               Save
             </Button>
           </div>
@@ -379,11 +384,12 @@ export default function NadeAiClient() {
         title="Models"
         subtitle="Public id -> real target. Test sends one real ping through the router."
         action={
-          <Button size="sm" icon="add" onClick={startAdd}>
+          <Button size="sm" icon="add" onClick={startAdd} data-assistant-id="nadeai-add">
             Add model
           </Button>
         }
       >
+        <div data-assistant-id="nadeai-models-list">
         {models.length === 0 ? (
           <p className="text-sm text-text-muted">No masked models yet - use &quot;Add model&quot;.</p>
         ) : filtered.length === 0 ? (
@@ -449,6 +455,7 @@ export default function NadeAiClient() {
             </div>
           ))
         )}
+        </div>
       </Card>
 
       <datalist id="nadeai-public-providers">

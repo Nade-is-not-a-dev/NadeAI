@@ -986,7 +986,7 @@ export default function APIPageClient({ machineId }) {
             <span className="material-symbols-outlined text-primary">vpn_key</span>
             API Keys
           </h2>
-          <Button icon="add" onClick={() => setShowAddModal(true)}>
+          <Button icon="add" onClick={() => setShowAddModal(true)} data-assistant-id="endpoint-create-key">
             Create Key
           </Button>
         </div>
@@ -1017,12 +1017,12 @@ export default function APIPageClient({ machineId }) {
             </div>
             <p className="text-text-main font-medium mb-1">No API keys yet</p>
             <p className="text-sm text-text-muted mb-4">Create your first API key to get started</p>
-            <Button icon="add" onClick={() => setShowAddModal(true)}>
+            <Button icon="add" onClick={() => setShowAddModal(true)} data-assistant-id="endpoint-create-key">
               Create Key
             </Button>
           </div>
         ) : (
-          <div className="flex flex-col">
+          <div className="flex flex-col" data-assistant-id="endpoint-keys-list">
             {keys.map((key) => (
               <div
                 key={key.id}

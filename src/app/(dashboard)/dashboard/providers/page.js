@@ -447,6 +447,7 @@ export default function ProvidersPage() {
               size="sm"
               icon="add"
               onClick={() => setShowAddAnthropicCompatibleModal(true)}
+              data-assistant-id="providers-add-anthropic"
               className="w-full sm:w-auto"
             >
               Add Anthropic Compatible
@@ -456,6 +457,7 @@ export default function ProvidersPage() {
               variant="secondary"
               icon="add"
               onClick={() => setShowAddCompatibleModal(true)}
+              data-assistant-id="providers-add-openai"
               className="w-full !bg-white !text-black hover:!bg-gray-100 sm:w-auto"
             >
               Add OpenAI Compatible
@@ -499,6 +501,7 @@ export default function ProvidersPage() {
             <ModelAvailabilityBadge />
             <button
               onClick={() => handleBatchTest("oauth")}
+              data-assistant-id="providers-test-oauth"
               disabled={!!testingMode}
               className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:w-auto sm:py-1.5 ${
                 testingMode === "oauth"
@@ -544,6 +547,7 @@ export default function ProvidersPage() {
           </h2>
           <button
             onClick={() => handleBatchTest("free")}
+            data-assistant-id="providers-test-free"
             disabled={!!testingMode}
             className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:w-auto sm:py-1.5 ${
               testingMode === "free"
@@ -605,6 +609,7 @@ export default function ProvidersPage() {
           </h2>
           <button
             onClick={() => handleBatchTest("apikey")}
+            data-assistant-id="providers-test-apikey"
             disabled={!!testingMode}
             className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:w-auto sm:py-1.5 ${
               testingMode === "apikey"

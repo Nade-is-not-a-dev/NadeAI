@@ -268,9 +268,9 @@ export default function SystemPromptClient() {
               fail-open and skips requests that already carry the same text.
             </p>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div data-assistant-id="sysprompt-toggle" className="flex items-center gap-3 shrink-0">
             <Toggle checked={enabled} onChange={setEnabled} />
-            <Button icon="save" onClick={handleSave} loading={saving}>
+            <Button icon="save" onClick={handleSave} loading={saving} data-assistant-id="sysprompt-save">
               Save
             </Button>
           </div>
@@ -284,6 +284,7 @@ export default function SystemPromptClient() {
 
       <Card title="Universal" subtitle="Applies to every model and provider.">
         <textarea
+          data-assistant-id="sysprompt-universal"
           value={universal}
           onChange={(e) => setUniversal(e.target.value)}
           placeholder="e.g. Always answer in Indonesian unless the user writes in another language."
