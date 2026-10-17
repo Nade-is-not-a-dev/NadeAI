@@ -11,6 +11,7 @@ import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import useSettingsStore from "@/store/settingsStore";
 import Button from "./Button";
 import { ConfirmModal } from "./Modal";
+import { useAssistantStore } from "@/store/assistantStore";
 
 // const VISIBLE_MEDIA_KINDS = ["embedding", "image", "imageToText", "tts", "stt", "webSearch", "webFetch", "video", "music"];
 const VISIBLE_MEDIA_KINDS = ["embedding", "image", "video", "tts", "stt", "systemone"];
@@ -197,6 +198,7 @@ export default function Sidebar({ onClose }) {
               key={item.href}
               href={item.href}
               onClick={onClose}
+              data-assistant-id={`nav-${item.href.split("/").filter(Boolean).pop()}`}
               className={cn(
                 "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
                 isActive(item.href)
@@ -216,6 +218,24 @@ export default function Sidebar({ onClose }) {
             </Link>
           ))}
 
+          <button
+            type="button"
+            data-assistant-id="nav-assistant"
+            onClick={() => {
+              useAssistantStore.getState().setOpen(true);
+              if (onClose) onClose();
+            }}
+            className={cn(
+              "flex w-full items-center gap-3 px-3 py-1 rounded-lg transition-all group text-left",
+              "text-text-muted hover:bg-surface-2 hover:text-text-main"
+            )}
+          >
+            <span className="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">
+              theater_comedy
+            </span>
+            <span className="text-[13px] font-medium">NadeAI Assistant</span>
+          </button>
+
           {/* System section */}
           <div className="pt-3 mt-2 space-y-0.5">
             <p className="px-4 text-xs font-semibold text-text-muted/60 uppercase tracking-wider mb-2">
@@ -224,6 +244,7 @@ export default function Sidebar({ onClose }) {
 
             {/* Media Providers accordion */}
             <button
+              data-assistant-id="nav-media-providers"
               onClick={() => setMediaOpen((v) => !v)}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
@@ -278,6 +299,7 @@ export default function Sidebar({ onClose }) {
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
+                data-assistant-id={`nav-${item.href.split("/").filter(Boolean).pop()}`}
                 className={cn(
                   "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
                   isActive(item.href)
@@ -305,6 +327,7 @@ export default function Sidebar({ onClose }) {
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
+                  data-assistant-id={`nav-${item.href.split("/").filter(Boolean).pop()}`}
                   className={cn(
                     "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
                     isActive(item.href)
@@ -366,6 +389,7 @@ export default function Sidebar({ onClose }) {
             <Link
               href="/dashboard/profile"
               onClick={onClose}
+              data-assistant-id="nav-profile"
               className={cn(
                 "flex items-center gap-3 px-3 py-1 rounded-lg transition-all group",
                 isActive("/dashboard/profile")
