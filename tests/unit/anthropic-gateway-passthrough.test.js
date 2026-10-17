@@ -71,10 +71,10 @@ describe("upstream response header forwarding", () => {
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 
-  it("keeps the gateway retry-after on all-accounts-limited responses", () => {
+  it("advertises a fixed 3s retry-after on all-accounts-limited responses", () => {
     const retryAt = new Date(Date.now() + 30000).toISOString();
     const res = unavailableResponse(503, "busy", retryAt, "30s", upstreamResponseHeaders(upstream));
-    expect(Number(res.headers.get("retry-after"))).toBeGreaterThan(20);
+    expect(res.headers.get("retry-after")).toBe("3");
     expect(res.headers.get("anthropic-ratelimit-unified-reset")).toBe("1790000000");
   });
 });

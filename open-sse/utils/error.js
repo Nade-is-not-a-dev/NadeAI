@@ -110,12 +110,14 @@ export function createErrorResult(statusCode, message, resetsAtMs, extraHeaders 
  * Create unavailable response when all accounts are rate limited
  * @param {number} statusCode - Original error status code
  * @param {string} message - Error message (without retry info)
- * @param {string} retryAfter - ISO timestamp when earliest account becomes available
+ * @param {string} retryAfter - ISO timestamp when earliest account becomes available (informational; no longer used for the header)
  * @param {string} retryAfterHuman - Human-readable retry info e.g. "reset after 30s"
  * @returns {Response}
  */
 export function unavailableResponse(statusCode, message, retryAfter, retryAfterHuman, extraHeaders = null) {
-  const retryAfterSec = Math.max(Math.ceil((new Date(retryAfter).getTime() - Date.now()) / 1000), 1);
+  // Fixed 3s: a quick client retry rides out relay egress-region flaps instead of
+  // waiting out the account cooldown; the human text still reports the real reset.
+  const retryAfterSec = 3;
   const msg = `${message} (${retryAfterHuman})`;
   return new Response(
     JSON.stringify({ error: { message: msg } }),
