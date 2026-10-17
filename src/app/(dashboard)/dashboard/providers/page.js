@@ -401,6 +401,30 @@ export default function ProvidersPage() {
         </select>
       </div>
 
+      {/* NadeAI masked models */}
+      <Link href="/dashboard/nadeai">
+        <Card hover>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-[10px] bg-bg text-text-muted">
+                <span className="material-symbols-outlined text-[20px]">theater_comedy</span>
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-text-main">NadeAI</p>
+                <p className="text-sm text-text-muted">
+                  Masked models - route public model ids to real providers, each with its own
+                  system prompt.
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary shrink-0">
+              Manage
+              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </span>
+          </div>
+        </Card>
+      </Link>
+
       {!hasAnyResult && (
         <div className="text-center py-8 border border-dashed border-border rounded-xl">
           <span className="material-symbols-outlined text-[32px] text-text-muted mb-2">

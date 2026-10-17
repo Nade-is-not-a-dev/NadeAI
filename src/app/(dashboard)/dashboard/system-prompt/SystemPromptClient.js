@@ -160,7 +160,14 @@ export default function SystemPromptClient() {
         }
         if (aliasesRes.ok) {
           const data = await aliasesRes.json();
-          if (!cancelled) setModelAliases(data?.aliases || {});
+          const aliases = data?.aliases || {};
+          if (!cancelled) {
+            setModelAliases(aliases);
+            // Slashed alias ids (e.g. "nadeai/claude-fable-5.1") are valid
+            // "Per model" scope keys - surface them as key suggestions.
+            const keys = Object.keys(aliases);
+            if (keys.length) setModelOptions((prev) => [...new Set([...prev, ...keys])].sort());
+          }
         }
       } catch {
         // Suggestions are optional; the key inputs stay free-text.

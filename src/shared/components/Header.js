@@ -127,6 +127,13 @@ const getPageInfo = (pathname) => {
       icon: "edit_note",
       breadcrumbs: [],
     };
+  if (pathname.includes("/nadeai"))
+    return {
+      title: "NadeAI",
+      description: "Masked models - public ids routed to real providers with their own prompts",
+      icon: "theater_comedy",
+      breadcrumbs: [],
+    };
   if (pathname.includes("/cli-tools"))
     return {
       title: "CLI Tools",
