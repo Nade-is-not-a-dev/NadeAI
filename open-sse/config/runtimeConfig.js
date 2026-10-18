@@ -92,6 +92,48 @@ export function resolveRetryEntry(entry) {
   };
 }
 
+// === Server-side upstream retry (relay resilience) ===
+// A relayed upstream can fail transiently per request — e.g. a Cloudflare
+// Worker relaying through an egress region the target blocks (403 "region not
+// allowed"), IP-scoped 429s, or edge 5xx (520-524). The executor retries the
+// same request server-side before any error reaches the client; every attempt
+// is a fresh connection, so a flaky relay gets several chances to egress
+// cleanly. BaseExecutor merges this between DEFAULT_RETRY_CONFIG and the
+// provider's own transport.retry entry — provider config still has the final
+// say for any status it defines.
+//   NADEAI_RETRY_MAX_ATTEMPTS  total tries per request incl. the first (default 10; <=1 disables)
+//   NADEAI_RETRY_DELAY_MS      pause between tries in ms (default 500)
+//   NADEAI_RETRY_STATUSES      comma list replacing the default set
+//                              (default 403,408,425,429,500,502,503,504,520,521,522,523,524,529)
+//   NADEAI_RETRY_BUDGET_MS     overall retry window cap, 0 = unbounded (default 180000)
+function envNonNegInt(name, def) {
+  const raw = process.env[name];
+  if (raw == null || raw === "") return def;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 0 ? n : def;
+}
+
+const UPSTREAM_RETRY_DEFAULT_STATUSES = [403, 408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 523, 524, 529];
+
+const upstreamRetryStatuses = (() => {
+  const raw = process.env.NADEAI_RETRY_STATUSES;
+  if (raw == null || raw.trim() === "") return UPSTREAM_RETRY_DEFAULT_STATUSES;
+  const list = raw.split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => Number.isFinite(n) && n >= 400 && n <= 599);
+  return list.length ? [...new Set(list)] : UPSTREAM_RETRY_DEFAULT_STATUSES;
+})();
+
+// attempts = retries after the first try, hence MAX_ATTEMPTS - 1 (10 -> 9 retries, 10 total)
+const UPSTREAM_RETRY_RETRIES = Math.max(0, envNonNegInt("NADEAI_RETRY_MAX_ATTEMPTS", 10) - 1);
+const UPSTREAM_RETRY_DELAY_MS = envNonNegInt("NADEAI_RETRY_DELAY_MS", 500);
+
+export const UPSTREAM_RETRY_BUDGET_MS = envNonNegInt("NADEAI_RETRY_BUDGET_MS", 180000);
+
+export const UPSTREAM_RETRY_CONFIG = Object.fromEntries(
+  upstreamRetryStatuses.map((status) => [status, { attempts: UPSTREAM_RETRY_RETRIES, delayMs: UPSTREAM_RETRY_DELAY_MS }])
+);
+
 // Requests containing these texts will bypass provider
 export const SKIP_PATTERNS = [
   "Please write a 5-10 word title for the following conversation:"

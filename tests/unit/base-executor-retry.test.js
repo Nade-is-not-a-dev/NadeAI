@@ -85,12 +85,15 @@ describe("BaseExecutor.execute — network error retry/fallback", () => {
 });
 
 describe("BaseExecutor.execute — computeRetryDelay hook veto", () => {
-  it("only invokes computeRetryDelay when status has retry config", async () => {
+  it("only invokes computeRetryDelay when status has retry config (418 — no config in any layer)", async () => {
+    // 418 rather than 500: the relay-resilience defaults (UPSTREAM_RETRY_CONFIG)
+    // now give 5xx statuses retry attempts, so only a status absent from every
+    // layer exercises the "no retry config" branch.
     const ex = makeExec({ baseUrl: "https://x/api", retry: { 503: { attempts: 1, delayMs: 0 } } });
     ex.computeRetryDelay = vi.fn().mockResolvedValue(0);
-    fetchMock.mockResolvedValueOnce(res(500));
+    fetchMock.mockResolvedValue(res(418));
     const out = await ex.execute({ model: "m", body: {}, stream: false, credentials: creds });
-    expect(out.response.status).toBe(500);
+    expect(out.response.status).toBe(418);
     expect(ex.computeRetryDelay).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

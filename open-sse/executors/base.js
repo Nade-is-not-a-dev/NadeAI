@@ -1,4 +1,4 @@
-import { HTTP_STATUS, RETRY_CONFIG, DEFAULT_RETRY_CONFIG, resolveRetryEntry, FETCH_CONNECT_TIMEOUT_MS } from "../config/runtimeConfig.js";
+import { HTTP_STATUS, RETRY_CONFIG, DEFAULT_RETRY_CONFIG, UPSTREAM_RETRY_CONFIG, UPSTREAM_RETRY_BUDGET_MS, resolveRetryEntry, FETCH_CONNECT_TIMEOUT_MS } from "../config/runtimeConfig.js";
 import { shouldRefreshCredentials } from "../services/oauthCredentialManager.js";
 import { proxyAwareFetch } from "../utils/proxyFetch.js";
 import { dbg } from "../utils/debugLog.js";
@@ -103,14 +103,26 @@ export class BaseExecutor {
     let lastStatus = 0;
     const retryAttemptsByUrl = {};
 
-    // Merge default retry config with provider-specific config
-    const retryConfig = { ...DEFAULT_RETRY_CONFIG, ...this.config.retry };
+    // Merge retry configs — later spreads win: relay-resilience defaults sit
+    // between the generic defaults and the provider's own transport.retry
+    // (registry entries / connection overrides), which has the final say.
+    const retryConfig = { ...DEFAULT_RETRY_CONFIG, ...UPSTREAM_RETRY_CONFIG, ...this.config?.retry };
+
+    // Overall ceiling for the retry window (0 = unbounded). Keeps a hanging
+    // upstream from stretching the full attempt count into a very long wait.
+    const retryDeadline = UPSTREAM_RETRY_BUDGET_MS > 0 ? Date.now() + UPSTREAM_RETRY_BUDGET_MS : 0;
 
     // Schedule retry via retryConfig[statusKey]. Returns true when caller should `urlIndex--; continue`
     // response (optional) lets a subclass hook compute a dynamic delay (e.g. antigravity Retry-After).
     const tryRetry = async (urlIndex, statusKey, reason, response = null) => {
       const { attempts, delayMs } = resolveRetryEntry(retryConfig[statusKey]);
       if (attempts <= 0 || retryAttemptsByUrl[urlIndex] >= attempts) return false;
+      // Retry window spent — stop even if attempts remain and let the caller
+      // surface the last error (or move on to a fallback URL).
+      if (retryDeadline && Date.now() > retryDeadline) {
+        log?.debug?.("RETRY", `retry budget ${UPSTREAM_RETRY_BUDGET_MS}ms exhausted after ${retryAttemptsByUrl[urlIndex]} retries`);
+        return false;
+      }
       // Hook: subclass may derive delay from the response (headers/body). null → skip retry, use fallback.
       let waitMs = delayMs;
       if (response && this.computeRetryDelay) {
